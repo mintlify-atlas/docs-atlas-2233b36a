@@ -1,0 +1,177 @@
+{
+  "projectType": "framework",
+  "projectName": "Athena",
+  "projectDescription": "The Linux OS for AI Agents — Persistent memory, autonomy, and time-awareness for any LLM",
+  "theme": "aspen",
+  "primaryColor": "#10b981",
+  "lightColor": "#22c55e",
+  "darkColor": "#16a34a",
+  "navigation": {
+    "tabs": [
+      {
+        "tab": "Documentation",
+        "groups": [
+          {
+            "group": "Getting Started",
+            "pages": [
+              "introduction",
+              "quickstart",
+              "installation",
+              "your-first-session"
+            ]
+          },
+          {
+            "group": "Core Concepts",
+            "pages": [
+              "core-concepts/architecture",
+              "core-concepts/memory-system",
+              "core-concepts/workflows",
+              "core-concepts/protocols",
+              "core-concepts/agent-compatibility"
+            ]
+          },
+          {
+            "group": "Guides",
+            "pages": [
+              "guides/creating-workflows",
+              "guides/writing-protocols",
+              "guides/semantic-search",
+              "guides/multi-model-strategy",
+              "guides/importing-data",
+              "guides/best-practices"
+            ]
+          },
+          {
+            "group": "Use Cases",
+            "pages": [
+              "use-cases/overview",
+              "use-cases/life-management",
+              "use-cases/work-projects",
+              "use-cases/research",
+              "use-cases/decision-making"
+            ]
+          },
+          {
+            "group": "Advanced",
+            "pages": [
+              "advanced/mcp-server",
+              "advanced/vector-rag",
+              "advanced/governance",
+              "advanced/security",
+              "advanced/exocortex-model"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "CLI Reference",
+        "groups": [
+          {
+            "group": "Commands",
+            "pages": [
+              "cli/overview",
+              "cli/init",
+              "cli/check",
+              "cli/doctor",
+              "cli/save"
+            ]
+          },
+          {
+            "group": "Workflows",
+            "pages": [
+              "workflows/start",
+              "workflows/end",
+              "workflows/think",
+              "workflows/research",
+              "workflows/save",
+              "workflows/all-workflows"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "SDK Reference",
+        "groups": [
+          {
+            "group": "Core",
+            "pages": [
+              "sdk/core/overview",
+              "sdk/core/boot",
+              "sdk/core/config",
+              "sdk/core/permissions"
+            ]
+          },
+          {
+            "group": "Memory",
+            "pages": [
+              "sdk/memory/overview",
+              "sdk/memory/vector-db",
+              "sdk/memory/sessions"
+            ]
+          },
+          {
+            "group": "Tools",
+            "pages": [
+              "sdk/tools/overview",
+              "sdk/tools/search",
+              "sdk/tools/agentic-search",
+              "sdk/tools/heartbeat"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Resources",
+        "groups": [
+          {
+            "group": "Help",
+            "pages": [
+              "resources/faq",
+              "resources/troubleshooting",
+              "resources/glossary",
+              "resources/case-studies"
+            ]
+          },
+          {
+            "group": "About",
+            "pages": [
+              "resources/manifesto",
+              "resources/benchmarks",
+              "resources/changelog",
+              "resources/contributing"
+            ]
+          }
+        ]
+      }
+    ]
+  },
+  "keyFeatures": [
+    "Model-agnostic persistent memory system stored as local Markdown files",
+    "110+ pre-built decision frameworks and protocols across 15 categories",
+    "Hybrid RAG search with semantic search, keyword matching, and reranking",
+    "50+ slash commands for workflows (start, end, think, research)",
+    "CLI tools for workspace initialization and agent management",
+    "Multi-IDE support (Antigravity, Cursor, Claude Code, VS Code)",
+    "Governed autonomy with 4-level capability tokens and security rails",
+    "MCP server with 8 tools and 2 resources for tool integration",
+    "Session-based memory that compounds over time",
+    "Git-based version control for all memory and protocols"
+  ],
+  "publicApiSurface": [
+    "athena init - Initialize new workspace",
+    "athena check - Basic health check",
+    "athena doctor - Full system diagnostics",
+    "athena save - Quicksave checkpoint",
+    "/start - Boot session workflow",
+    "/end - Close session workflow",
+    "/think - Deep reasoning mode",
+    "/ultrathink - Maximum depth reasoning",
+    "/research - Multi-source research workflow",
+    "/save - Manual checkpoint workflow",
+    "smart_search() - Hybrid RAG search",
+    "quicksave() - Save session checkpoint",
+    "health_check() - System health audit",
+    "recall_session() - Retrieve session logs",
+    "governance_status() - Check compliance state"
+  ]
+}
