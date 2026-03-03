@@ -1,0 +1,436 @@
+---
+title: Writing Protocols
+description: Create reusable decision-making protocols to codify expertise and operational procedures
+---
+
+Protocols are reusable decision frameworks stored in `.agent/skills/protocols/`. Unlike workflows (which execute tasks), protocols guide *how you think* about problems.
+
+## What is a Protocol?
+
+A protocol is a documented thinking pattern that you can invoke repeatedly. It answers questions like:
+- "How do I evaluate this decision?"
+- "What framework should I use for this analysis?"
+- "What questions should I ask before acting?"
+
+**Examples:**
+- **Protocol 123 (Einstein Protocol)**: Spend 11x more time defining the problem than solving it
+- **Protocol 137 (Graph of Thoughts)**: Generate solution paths, score them, converge on the best
+- **Protocol 416 (Agent Swarm)**: Parallelize work across multiple AI agents
+
+---
+
+## Protocol vs Workflow
+
+| Aspect | Workflow | Protocol |
+|:-------|:---------|:---------|
+| **Purpose** | Execute tasks | Guide thinking |
+| **Location** | `.agent/workflows/` | `.agent/skills/protocols/` |
+| **Invocation** | Slash command (`/deploy`) | Referenced by ID (`Protocol 123`) |
+| **Format** | Checklist of steps | Framework + decision logic |
+| **Example** | "Deploy to staging" | "55/5 Problem Definition Rule" |
+
+---
+
+## Protocol Structure
+
+### 1. YAML Frontmatter
+
+```yaml
+---
+created: 2025-12-20
+last_updated: 2026-01-30
+---
+```
+
+### 2. Header Block
+
+```markdown
+# Protocol 123: Einstein Protocol (55/5 Rule)
+
+> **Source**: Zero-Point Codex  
+> **Domain**: Decision / Problem Definition  
+> **Priority**: ⭐⭐⭐ Critical
+```
+
+### 3. Core Principle
+
+State the fundamental insight:
+
+```markdown
+## Core Principle
+
+> "If I had one hour to solve a problem, I'd spend 55 minutes defining the problem and 5 minutes solving it."
+
+**The Ratio**: 11:1 — Problem definition is 11x more valuable than problem execution.
+```
+
+### 4. The Trigger (When to Use)
+
+Define clear activation conditions:
+
+```markdown
+## The Trigger
+
+Use this protocol when:
+
+- Decision involves >$10K or >6 months
+- Pattern of repeated failure on similar problems
+- High emotional charge suggests misalignment
+- Stated goal feels disconnected from actions
+```
+
+### 5. The Mechanism (How It Works)
+
+Provide step-by-step instructions:
+
+```markdown
+## Implementation Protocol
+
+### Phase 1: Problem Archaeology (55 min)
+
+**Step 1: Stated vs Real Goal (10 min)**
+
+Q: What does the user SAY they want?
+Q: What do their ACTIONS optimize for?
+Q: If I gave them the stated goal for free, would they take it?
+Gap > 20%? → Stated goal is a proxy. Find the real one.
+
+**Step 2: Layer Diagnosis (15 min)**
+
+L4: Existential — "Why pursue this at all?"
+L3: Archetype — "Why this specific form?"
+L2: Arena — "Why this game/market?"
+L1: Strategy — "How to win?"
+L0: Tactics — "What specific action?"
+```
+
+### 6. Example Application
+
+```markdown
+## Example Application
+
+**Scenario**: User wants to "build an app to track fitness goals"
+
+**55-Minute Analysis**:
+- Stated goal: Fitness tracking app
+- Revealed preference: User hasn't tracked fitness manually for 3 months
+- Real goal: Accountability structure, not software
+
+**5-Minute Solution**: Join a fitness group with social pressure, not build an app.
+```
+
+### 7. Anti-Patterns
+
+```markdown
+## Anti-Patterns (What NOT to Do)
+
+| Anti-Pattern | Why It Fails |
+|--------------|---------------|
+| "Just tell me what to do" | Skips problem definition → solves wrong problem |
+| Optimizing tactics when strategy is broken | More effort, same bad outcome |
+| Accepting stated goal as real | Revealed preference often differs |
+```
+
+---
+
+## Step-by-Step: Writing Your First Protocol
+
+<Steps>
+  <Step title="Identify a recurring decision pattern">
+    Look for situations where you repeatedly use the same thinking framework. Examples:
+    - Evaluating feature requests
+    - Deciding whether to refactor code
+    - Choosing between technical approaches
+    - Assessing project viability
+  </Step>
+  
+  <Step title="Choose a protocol ID">
+    Pick a number that fits the category:
+    - **0-99**: Core principles
+    - **100-199**: Decision frameworks
+    - **200-299**: Verification methods
+    - **300-399**: Workflow patterns
+    - **400-499**: Architecture patterns
+    
+    Create file: `.agent/skills/protocols/decision/123-problem-definition.md`
+  </Step>
+  
+  <Step title="Document the core principle">
+    What is the fundamental insight?
+    
+    ```markdown
+    ## Core Principle
+    
+    > "[Quote or concise statement of the key idea]"
+    
+    **The Rule**: [Memorable ratio, formula, or heuristic]
+    ```
+  </Step>
+  
+  <Step title="Define activation triggers">
+    When should someone invoke this protocol?
+    
+    ```markdown
+    ## The Trigger
+    
+    Use this protocol when:
+    - [Condition 1]
+    - [Condition 2]
+    - [Condition 3]
+    ```
+  </Step>
+  
+  <Step title="Break down the mechanism">
+    Provide step-by-step instructions:
+    
+    <CodeGroup>
+    ```markdown Sequential Steps
+    ## Implementation
+    
+    ### Step 1: [Name]
+    [Instructions]
+    
+    ### Step 2: [Name]
+    [Instructions]
+    ```
+    
+    ```markdown Decision Tree
+    ## Decision Tree
+    
+    Problem arrives
+        ↓
+    Run this protocol?
+    ├─ YES if: [Condition A]
+    ├─ YES if: [Condition B]
+    └─ NO if: [Condition C]
+    ```
+    
+    ```markdown Table Format
+    ## Analysis Framework
+    
+    | Factor | Question | Optimization |
+    |:-------|:---------|:-------------|
+    | **Dimension A** | What is...? | Maximize... |
+    | **Dimension B** | How to...? | Minimize... |
+    ```
+    </CodeGroup>
+  </Step>
+  
+  <Step title="Add concrete examples">
+    Show the protocol in action:
+    
+    ```markdown
+    ## Example Application
+    
+    **Scenario**: [Brief description]
+    **Application**: [How the protocol was applied]
+    **Outcome**: [Result]
+    ```
+  </Step>
+  
+  <Step title="Document anti-patterns">
+    What are common mistakes when applying this protocol?
+    
+    ```markdown
+    ## Anti-Patterns
+    
+    | ❌ Don't | ✅ Do Instead |
+    |:---------|:-------------|
+    | [Bad pattern] | [Good pattern] |
+    ```
+  </Step>
+  
+  <Step title="Link related protocols">
+    Connect to the knowledge graph:
+    
+    ```markdown
+    ## Integration Points
+    
+    - **Before `/think`**: Run Layer Diagnosis
+    - **With Protocol 137**: Use for solution generation
+    
+    ## Related Protocols
+    
+    - [Protocol 124: SDR Diagnosis](decision/124-sdr-diagnosis.md)
+    - [Protocol 137: Graph of Thoughts](workflow/137-graph-of-thoughts.md)
+    ```
+  </Step>
+  
+  <Step title="Tag for discovery">
+    End with tags:
+    
+    ```markdown
+    ## Tags
+    
+    #protocol #decision #problem-definition #core
+    ```
+  </Step>
+</Steps>
+
+---
+
+## Real-World Protocol: Einstein Protocol (55/5 Rule)
+
+Here's how Protocol 123 is structured in the Athena codebase:
+
+```markdown
+# Protocol 123: Einstein Protocol (55/5 Rule)
+
+> **Source**: Zero-Point Codex  
+> **Domain**: Decision / Problem Definition  
+> **Priority**: ⭐⭐⭐ Critical
+
+## Core Principle
+
+> "If I had one hour to solve a problem, I'd spend 55 minutes defining the problem and 5 minutes solving it."
+
+**The Ratio**: 11:1 — Problem definition is 11x more valuable than problem execution.
+
+## The Failure Mode
+
+Standard Approach (Wrong):
+├─ Receive problem → Jump to solutions
+├─ 5 minutes: "What do we do?"
+├─ 55 minutes: Implementing wrong solution
+└─ Result: Efficiently solving the wrong problem ☠️
+
+Einstein Approach (Correct):
+├─ Receive problem → Interrogate assumptions
+├─ 55 minutes: "What is the ACTUAL problem?"
+├─ 5 minutes: Execute correct solution
+└─ Result: Effort vectors toward real target ✅
+
+## Implementation Protocol
+
+### Phase 1: Problem Archaeology (55 min)
+
+**Step 1: Stated vs Real Goal (10 min)**
+
+Q: What does the user SAY they want?
+Q: What do their ACTIONS optimize for? (Revealed Preference)
+Q: If I gave them the stated goal for free, would they take it?
+Gap > 20%? → Stated goal is a proxy. Find the real one.
+
+### Phase 2: Solution Execution (5 min)
+
+Only after Phase 1 completes:
+1. Activate Protocol 137: Graph of Thoughts
+2. Generate 3-5 solution paths
+3. Execute highest EV path
+```
+
+---
+
+## Protocol Categories
+
+Organize protocols by domain:
+
+### Decision Frameworks
+- **Protocol 123**: Einstein Protocol (55/5 Rule)
+- **Protocol 124**: SDR Diagnosis
+- **Protocol 111**: Premise Audit
+
+### Workflow Patterns
+- **Protocol 416**: Agent Swarm (Parallel Execution)
+- **Protocol 419**: Handoff Loop
+- **Protocol 137**: Graph of Thoughts
+
+### Verification Methods
+- **Protocol 171**: Cross-Model Validation
+- **Protocol 141**: Claim Atomization Audit
+- **Protocol 105**: Neuro-Symbolic Verification
+
+### Engineering
+- **Protocol 175**: TDD Workflow
+- **Protocol 44**: Micro-Commit Protocol
+
+---
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Start with 'why'" icon="lightbulb">
+    Every protocol should clearly state the problem it solves and the principle behind the solution.
+  </Card>
+  
+  <Card title="Make it actionable" icon="play">
+    Include concrete steps, not just philosophy. Someone should be able to execute the protocol without asking for clarification.
+  </Card>
+  
+  <Card title="Provide examples" icon="code">
+    Show the protocol in action with real scenarios. Abstract frameworks are hard to apply.
+  </Card>
+  
+  <Card title="Version it" icon="git-branch">
+    Use frontmatter to track creation and update dates. Protocols evolve as you learn.
+  </Card>
+</CardGroup>
+
+---
+
+## Protocol Naming Conventions
+
+**Format**: `Protocol [ID]: [Name]`
+
+**ID Ranges**:
+- **0-99**: Core principles (Laws, Identity)
+- **100-199**: Decision & analysis
+- **200-299**: Verification & quality
+- **300-399**: Workflow & process
+- **400-499**: Architecture & systems
+- **500+**: Domain-specific
+
+**File naming**: `[id]-[slug].md`
+
+Examples:
+- `123-einstein-protocol.md`
+- `416-agent-swarm.md`
+- `175-tdd-workflow.md`
+
+---
+
+## Integration with Workflows
+
+Protocols are referenced within workflows:
+
+```markdown
+# /think — Deep Reasoning Workflow
+
+## Phase 1: Problem Definition
+
+- [ ] Apply **Protocol 123 (Einstein Protocol)**
+- [ ] Run 55-minute problem archaeology
+- [ ] Validate real vs stated goal
+
+## Phase 2: Solution Generation
+
+- [ ] Apply **Protocol 137 (Graph of Thoughts)**
+- [ ] Generate 3-5 solution paths
+- [ ] Score and converge
+```
+
+---
+
+## Common Pitfalls
+
+| ❌ Don't | ✅ Do Instead |
+|:---------|:-------------|
+| Write philosophy without steps | Provide concrete, executable instructions |
+| Skip the "when to use" section | Define clear activation triggers |
+| Forget examples | Show the protocol solving a real problem |
+| Use vague language | Be specific and measurable |
+| Ignore anti-patterns | Document what NOT to do |
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Semantic Search" href="/guides/semantic-search" icon="magnifying-glass">
+    Learn how Athena finds and retrieves your protocols using triple-path retrieval
+  </Card>
+  
+  <Card title="Best Practices" href="/guides/best-practices" icon="star">
+    Operational discipline for maintaining your protocol library
+  </Card>
+</CardGroup>

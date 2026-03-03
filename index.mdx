@@ -1,97 +1,164 @@
 ---
-title: "Introduction"
-description: "Welcome to the new home for your documentation"
+title: Welcome to Athena
+description: Your memory. Your machine. Any model. An open-source AI personalization layer that gives you persistent memory, structured reasoning, and full data ownership.
 ---
 
-## Setting up
+<img src="/images/athena-banner.png" alt="Athena Banner" />
 
-Get your documentation site up and running in minutes.
+## Your memory. Your machine. Any model.
 
-<Card
-  title="Start here"
-  icon="rocket"
-  href="/quickstart"
-  horizontal
->
-  Follow our three step quickstart guide.
-</Card>
+Athena is an open-source AI personalization layer that gives you persistent memory, structured reasoning, and full data ownership — across ChatGPT, Claude, Gemini, and any model you switch to next.
 
-## Make it yours
+**Platforms forget. Athena doesn't.**
 
-Design a docs site that looks great and empowers your users.
-
-<Columns cols={2}>
-  <Card
-    title="Edit locally"
-    icon="pen-to-square"
-    href="/development"
-  >
-    Edit your docs locally and preview them in real time.
+<CardGroup cols={2}>
+  <Card title="Quick start" icon="rocket" href="/quickstart">
+    Get up and running in 5 minutes
   </Card>
-  <Card
-    title="Customize your site"
-    icon="palette"
-    href="/essentials/settings"
-  >
-    Customize the design and colors of your site to match your brand.
+  <Card title="Installation" icon="download" href="/installation">
+    Set up your workspace step by step
   </Card>
-    <Card
-    title="Set up navigation"
-    icon="map"
-    href="/essentials/navigation"
-  >
-    Organize your docs to help users find what they need and succeed with your product.
+  <Card title="Your first session" icon="play" href="/your-first-session">
+    Walk through a guided tutorial
   </Card>
-  <Card
-    title="API documentation"
-    icon="terminal"
-    href="/api-reference/introduction"
-  >
-    Auto-generate API documentation from OpenAPI specifications.
+  <Card title="Architecture" icon="diagram-project" href="/architecture">
+    Understand how Athena works
   </Card>
-</Columns>
+</CardGroup>
 
-## Create beautiful pages
+## The problem
 
-Everything you need to create world-class documentation.
+You've spent months training ChatGPT to understand you. Then a model update resets the personality. Your custom instructions stop working. You can't find that conversation from last Tuesday. And if you switch to Claude or Gemini? **You start from zero.**
 
-<Columns cols={2}>
-  <Card
-    title="Write with MDX"
-    icon="pen-fancy"
-    href="/essentials/markdown"
-  >
-    Use MDX to style your docs pages.
-  </Card>
-  <Card
-    title="Code samples"
-    icon="code"
-    href="/essentials/code"
-  >
-    Add sample code to demonstrate how to use your product.
-  </Card>
-  <Card
-    title="Images"
-    icon="image"
-    href="/essentials/images"
-  >
-    Display images and other media.
-  </Card>
-  <Card
-    title="Reusable snippets"
-    icon="recycle"
-    href="/essentials/reusable-snippets"
-  >
-    Write once and reuse across your docs.
-  </Card>
-</Columns>
+Platform memory is **unreliable, opaque, and locked to one provider**. You don't own it, you can't inspect it, and you can't take it with you.
 
-## Need inspiration?
+## Why Athena?
 
-<Card
-  title="See complete examples"
-  icon="stars"
-  href="https://mintlify.com/customers"
->
-  Browse our showcase of exceptional documentation sites.
-</Card>
+Athena moves the memory layer to **your machine**. Plain Markdown files that you own, version-control, and point at any model.
+
+<CardGroup cols={2}>
+  <Card title="Your memory, your machine" icon="brain">
+    Files on your disk, not in OpenAI's cloud. Read them, edit them, git-version them.
+  </Card>
+  <Card title="Switch models freely" icon="arrows-rotate">
+    Claude today, Gemini tomorrow, GPT next week. The memory stays. The model is just whoever's on shift.
+  </Card>
+  <Card title="It compounds" icon="chart-line">
+    Session 500 recalls patterns from session 5. Platform memory decays; Athena's doesn't.
+  </Card>
+  <Card title="Governed autonomy" icon="shield">
+    6 constitutional laws, 4 capability levels, bounded agency.
+  </Card>
+</CardGroup>
+
+<Note>
+**~10K token boot** — 95% of your context window stays free, even after 10,000 sessions.
+</Note>
+
+## How it works
+
+Every session follows one cycle: **`/start` → Work → `/end`**. Each cycle deposits structured memory. Over hundreds of cycles, the AI stops being generic and starts thinking like *you*.
+
+<Steps>
+  <Step title="Boot with /start">
+    Load your identity, past context, and session state
+  </Step>
+  <Step title="Work naturally">
+    Ask questions, make decisions, build projects
+  </Step>
+  <Step title="Close with /end">
+    Extract insights, update memory, commit everything
+  </Step>
+  <Step title="Memory compounds">
+    Next session picks up exactly where you left off
+  </Step>
+</Steps>
+
+| Sessions | What happens |
+|:---------|:-------------|
+| **1–50** | Basic recall — remembers your name, project, preferences |
+| **50–200** | Pattern recognition — anticipates your style and blind spots |
+| **200+** | Deep sync — thinks in your frameworks before you state them |
+
+<Tip>
+The LLM is the engine. Athena is the chassis, the memory, and the rules of the road. Swap the engine anytime — the car remembers every road you've driven.
+</Tip>
+
+## What's in the box
+
+Everything you need to turn a generic AI into **your** AI — pre-configured, no assembly required.
+
+- **Core Identity** — Your AI's personality, principles, and boundaries — editable, version-controlled
+- **Cognitive Clusters** — Groups related protocols into auto-co-activating bundles — 3 starter clusters included
+- **110+ Protocols** — Ready-made decision frameworks (risk analysis, research, strategy) across 15 categories
+- **50+ Slash Commands** — One-word triggers: `/start`, `/end`, `/think`, `/research`
+- **Smart Search** — Finds the right memory even if you describe it vaguely (5 sources, auto-ranked)
+- **Tool Integration** — Your agent can search, save, and execute scripts on your behalf
+- **Safety Rails** — Controls what the AI can and can't do autonomously (4 levels, from read-only to full agency)
+
+## Compatible editors
+
+Athena works through **AI-enabled code editors** — apps that connect to AI models while reading your local files.
+
+<CardGroup cols={3}>
+  <Card title="Claude Code" icon="code" href="https://docs.anthropic.com/en/docs/claude-code">
+    ✅ Fully supported
+  </Card>
+  <Card title="Antigravity" icon="google" href="https://antigravity.google/">
+    ✅ Fully supported
+  </Card>
+  <Card title="Cursor" icon="cursor" href="https://cursor.com">
+    ✅ Fully supported
+  </Card>
+  <Card title="Gemini CLI" icon="terminal" href="https://github.com/google-gemini/gemini-cli">
+    ✅ Fully supported
+  </Card>
+  <Card title="VS Code + Copilot" icon="microsoft" href="https://code.visualstudio.com/">
+    ✅ Fully supported
+  </Card>
+  <Card title="Kilo Code" icon="k" href="https://kilocode.ai/">
+    ✅ Fully supported
+  </Card>
+</CardGroup>
+
+<Warning>
+Athena does **not** work through ChatGPT.com, Claude.ai, or Gemini web — those are closed sandboxes that can't read your disk.
+</Warning>
+
+## Use cases
+
+Not just for coding. Athena is used for personal knowledge management, health tracking, creative writing, business strategy, and daily life — by people who've never written a line of code.
+
+| Use case | What it looks like |
+|:---------|:-------------------|
+| **Life management** | Daily routines, health tracking, pet care, family scheduling |
+| **Work & projects** | Switch between multiple client projects without losing context. Meeting prep, cross-team knowledge. |
+| **Writing & voice** | After 30 sessions, the AI stops sounding like ChatGPT and starts sounding like *you*. |
+| **Decision-making** | *"Should I take this job offer?"* — answered using your actual risk tolerance, career goals, and decision history. |
+| **Research & synthesis** | Compile 200 sources into one framework — still searchable and citable 6 months later. |
+| **Strategic planning** | Long-term planning across dozens of sessions with full context of your past decisions. |
+
+## Cost
+
+**Athena is free. Forever. MIT licensed.** You only pay for the AI subscription you're probably already paying for.
+
+| Plan | Cost | Who it's for |
+|:-----|:-----|:-------------|
+| **Google Antigravity (free tier)** | **$0** | **Try Athena first** — included with any Google account |
+| Claude Pro / Google AI Pro | ~$20/mo | Daily users — the sweet spot for most people |
+| Claude Max / Google AI Ultra | $200+/mo | Power users managing multiple domains (8+ hrs/day) |
+
+<Tip>
+**Try before you buy.** Athena works with Google Antigravity's free tier — clone the repo, type `/start`, and see if it clicks. No credit card, no trial period, no catch.
+</Tip>
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Quick start" icon="rocket" href="/quickstart">
+    Get started in 5 minutes
+  </Card>
+  <Card title="Installation guide" icon="wrench" href="/installation">
+    Detailed setup instructions
+  </Card>
+</CardGroup>

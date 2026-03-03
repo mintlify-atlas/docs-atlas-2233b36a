@@ -1,0 +1,142 @@
+---
+title: "Case Studies"
+description: "Real examples of how people use Athena framework in production"
+---
+
+<Info>
+Real examples of how people use Athena. Names and identifying details are anonymized.
+</Info>
+
+## Case Study #1: From Routine App to Life Engine in 72 Hours
+
+**User profile:** Non-developer. Parent. Pet owner. Full-time employee.
+
+**Setup:** Google Antigravity (free tier) → upgraded to Pro after Day 1.
+
+**Sessions:** 24 sessions across 3 days.
+
+### The Starting Point
+
+This user forked Athena with a simple goal: *"I need help managing my daily routines."*
+
+No coding background. No AI agent experience. Just someone tired of things falling through the cracks — kids' schedules, pet care, work shifts, health tracking — spread across notebooks, calendar apps, and sticky notes.
+
+### What They Built (Day by Day)
+
+<Tabs>
+  <Tab title="Day 1: Basic Routines">
+    - Created a **daily routine app** with morning and evening time blocks
+    - Added **kids' evening routine** scheduling (bedtimes, homework, meals)
+    - Set up **pet care tracking** — daily walks, feeding times, grooming schedule
+    - Added **work shift overrides** for irregular schedules
+    - Logged **vacation blocks** for upcoming time off
+
+    By the end of Day 1, they had a working daily planner that their AI understood completely.
+  </Tab>
+  
+  <Tab title="Day 2: Intelligence Layer">
+    - Built a **Telegram reminder bot** — the AI sends reminders throughout the day
+    - Created **"Life Engine Boot Protocols"** — structured rules for food, glucose, and energy management
+    - Implemented **task ingestion** — describe a task in plain language, the AI slots it into the schedule
+    - Started **health tracking** — extracted data from 43 blood test screenshots into a structured analysis
+    - The AI began making **proactive suggestions** based on patterns it noticed across sessions
+  </Tab>
+  
+  <Tab title="Day 3: Gamification & Automation">
+    - Added a **points system** for completing daily routines
+    - Built a **Chart.js dashboard** to visualize habit streaks and scores
+    - Created **bidirectional spreadsheet sync** — data flows between the dashboard and cloud storage
+    - Migrated hosting from Netlify to **GitHub Pages** for persistence
+    - Moved the gamification graph to a dedicated **Productivity tab**
+  </Tab>
+</Tabs>
+
+### The Progression
+
+```text
+Session 1:  "Help me organize my morning routine"
+Session 8:  "Build me a Telegram bot that reminds me to walk the dog at 7pm"
+Session 15: "Analyze my blood test results and track trends"
+Session 24: "Gamify my routines — I want points and streaks with a dashboard"
+```
+
+In 72 hours, a non-technical user went from "help me organize my mornings" to a **fully automated life management system** with:
+
+<CardGroup cols={2}>
+  <Card title="Smart Scheduling" icon="calendar-check">
+    Shift and vacation overrides built-in
+  </Card>
+  <Card title="Pet Care Tracking" icon="paw">
+    Grooming cadences and daily routines
+  </Card>
+  <Card title="Health Monitoring" icon="heart-pulse">
+    Lab results tracking and trend analysis
+  </Card>
+  <Card title="Telegram Bot" icon="message-bot">
+    Real-time reminders throughout the day
+  </Card>
+  <Card title="Gamified Dashboard" icon="chart-line">
+    Points and streaks with visual charts
+  </Card>
+  <Card title="Cloud Sync" icon="cloud">
+    Data synchronized across devices
+  </Card>
+</CardGroup>
+
+### Why This Worked
+
+<AccordionGroup>
+  <Accordion title="1. No setup barrier">
+    Clone, `/start`, and talk. The user didn't configure anything — they just described what they needed.
+  </Accordion>
+  
+  <Accordion title="2. Memory compounded">
+    By session 8, the AI knew the kids' names, the dog's grooming schedule, and the user's work pattern. It stopped asking for context and started anticipating needs.
+  </Accordion>
+  
+  <Accordion title="3. User-driven evolution">
+    Athena didn't prescribe a "life management template." The user's own needs — expressed in plain language across 24 sessions — shaped the system organically.
+  </Accordion>
+  
+  <Accordion title="4. Non-technical throughout">
+    The most technical commit message in the entire history: *"Specify Brush Quinny's fur instead of teeth."* That's a human correcting their AI about a dog, not writing code.
+  </Accordion>
+</AccordionGroup>
+
+### Key Takeaway
+
+<Warning>
+Athena isn't a productivity app. It's a **framework that becomes whatever you need it to be** — driven by your conversations, not by features someone else designed.
+</Warning>
+
+This user never read the architecture docs. They never used the CLI. They never wrote a protocol. They just talked to their AI every day, and the system grew around their life.
+
+---
+
+## Key Patterns Across Users
+
+While we currently feature one detailed case study, common patterns emerge:
+
+### Non-Technical Users Excel
+
+Many of the most sophisticated Athena implementations come from non-developers who simply describe what they need in natural language. The framework removes the barrier between intent and execution.
+
+### Memory Is The Differentiator
+
+Users consistently report that the "aha moment" comes when the AI stops asking for context it should already know. Persistent memory transforms the experience from "answering questions" to "working with a colleague."
+
+### Evolution Over Planning
+
+Successful users don't architect their entire system upfront. They start with one immediate need, solve it, and let the next need emerge naturally. The system grows organically through conversation.
+
+### Personal > Generic
+
+The most valuable Athena instances are deeply personalized. They know your constraints, preferences, and context — making them far more useful than generic productivity tools.
+
+---
+
+## Share Your Story
+
+<Card title="Contribute a Case Study" icon="github" href="https://github.com/winstonkoh87/Athena-Public/issues">
+  Have a case study to share? Open an issue or submit a PR — we'd love to feature your story.
+</Card>

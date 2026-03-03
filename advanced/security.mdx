@@ -1,0 +1,317 @@
+---
+title: Security Model
+description: Permissioning, secret mode, data residency, and agentic safety practices
+---
+
+## Data Residency Options
+
+Athena supports three deployment modes based on your security requirements:
+
+| Mode | Where Data Lives | Best For |
+|------|------------------|----------|
+| **Cloud** | Supabase (your project) | Cross-device access, collaboration |
+| **Local** | Your machine only | Sensitive data, air-gapped environments |
+| **Hybrid** | Local files + cloud embeddings | Best of both (embeddings only leave machine) |
+
+<Warning>
+**Sensitive data?** Keep it local. The `athena` SDK supports local vector stores (ChromaDB, LanceDB) for users who don't want data leaving their machine.
+</Warning>
+
+## What Leaves Your Machine (Cloud Mode)
+
+When using Cloud mode, understand the data flow:
+
+| Component | Sends Raw Text? | Sends Embeddings? | Destination |
+|-----------|-----------------|-------------------|-------------|
+| **Embedding API** | ✅ Yes (text chunks) | — | Google Cloud |
+| **LLM API** | ✅ Yes (prompts) | — | Anthropic (Claude) |
+| **Supabase** | ❌ No | ✅ Yes (vectors only) | Your Supabase project |
+
+**Key Points:**
+
+- Raw text is sent to Google Cloud for embedding generation
+- Prompts are sent to Anthropic for LLM responses  
+- Only vector embeddings (not raw text) are stored in Supabase
+- All Supabase data resides in YOUR project—you control the database
+
+## Permissioning Layer
+
+Version 8.4.0+ introduced a comprehensive Permission Engine that gates all MCP tools.
+
+### Capability Tokens
+
+4 escalating permission levels:
+
+| Level | Access | Example Tools |
+|-------|--------|---------------|
+| `read` | Query data, read config | `smart_search`, `recall_session` |
+| `write` | Modify session logs | `quicksave` |
+| `admin` | Modify config, toggle modes | `set_secret_mode` |
+| `dangerous` | Delete data (future, unused) | — |
+
+**Default caller level:** `write` (grants access to both `read` and `write` tools)
+
+### Sensitivity Labels
+
+3 data classification tiers:
+
+| Label | Description | Access in Secret Mode? | Examples |
+|-------|-------------|------------------------|----------|
+| `public` | Safe for demos | ✅ Allowed | Health check, memory paths |
+| `internal` | Normal operational data | 🔒 Blocked | Session logs, search results |
+| `secret` | Credentials, PII | 🔒 Blocked + Redacted | API keys, trading data |
+
+### Permission Gate Implementation
+
+```python
+from athena.core.permissions import get_permissions
+
+@mcp.tool(tags={"read", "memory"})
+def smart_search(query: str) -> dict:
+    # Permission gate
+    perms = get_permissions()
+    perms.gate("smart_search")  # Raises PermissionDenied if blocked
+    
+    # Tool logic...
+    return results
+```
+
+See `src/athena/mcp_server.py:86` for the implementation.
+
+## Secret Mode
+
+Toggle via `set_secret_mode(True)` when:
+
+- **Screen sharing during demos** — Hide sensitive data from viewers
+- **External pair-programming** — Work with external developers safely
+- **Client presentations** — Show Athena without exposing internal data
+
+### Behavior When Active
+
+```python
+set_secret_mode(True)
+```
+
+**Access Control:**
+
+- ✅ `health_check` and `list_memory_paths` remain accessible (PUBLIC tools)
+- 🔒 All INTERNAL and SECRET tools are blocked
+- 📝 Content from PUBLIC tools is auto-redacted
+
+**Redaction Patterns:**
+
+Sensitive patterns are automatically replaced with `[REDACTED]`:
+
+```python
+SECRET_PATTERNS = [
+    "api_key", "password", "SUPABASE_KEY",
+    "trading", ".env", "credentials",
+    "GOOGLE_API_KEY", "ANTHROPIC_API_KEY"
+]
+```
+
+**Example:**
+
+```python
+# Before redaction
+"My GOOGLE_API_KEY is abc123 and trading position is +$50K"
+
+# After redaction (Secret Mode)
+"My [REDACTED] is [REDACTED] and [REDACTED] position is [REDACTED]"
+```
+
+### Toggling Secret Mode
+
+```python
+from athena.core.permissions import get_permissions
+
+perms = get_permissions()
+
+# Enable secret mode
+result = perms.set_secret_mode(True)
+# Returns: {"secret_mode": true, "blocked_tools": ["smart_search", ...]}
+
+# Disable secret mode
+result = perms.set_secret_mode(False)
+# Returns: {"secret_mode": false, "blocked_tools": []}
+```
+
+## Audit Trail
+
+Every permission check is logged with:
+
+- Timestamp
+- Action (tool name)
+- Target (resource being accessed)
+- Outcome (allowed/denied)
+
+**Audit log is bounded at 1,000 entries** (auto-truncated to 500 when limit reached).
+
+**State persists to:** `.agent/state/permissions.json`
+
+```json
+{
+  "caller_level": "write",
+  "secret_mode": false,
+  "audit_log": [
+    {
+      "timestamp": "2026-03-03T10:30:00",
+      "action": "smart_search",
+      "target": "trading protocols",
+      "outcome": "allowed"
+    }
+  ]
+}
+```
+
+## Key Security Practices
+
+### Supabase Keys
+
+<Warning>
+**Never expose `SUPABASE_SERVICE_ROLE_KEY` in code or logs.**
+
+Use `SUPABASE_ANON_KEY` for client-side operations. The service role key bypasses Row-Level Security and should only be used server-side.
+</Warning>
+
+```bash
+# .env file (NEVER commit to git)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key  # Server-side only!
+SUPABASE_ANON_KEY=your-anon-key  # Client-side safe
+```
+
+### Row-Level Security
+
+Enable RLS on all Supabase tables:
+
+```sql
+ALTER TABLE protocols ENABLE ROW LEVEL SECURITY;
+
+CREATE POLICY "Enable read for authenticated users"
+ON protocols FOR SELECT
+USING (auth.role() = 'authenticated');
+```
+
+### Agentic Safety
+
+When using an agentic IDE with filesystem access:
+
+<Warning>
+**Restrict the agent's working directory.** Never grant access to:
+
+- `~/.ssh` — SSH keys and credentials
+- `.env` files — Environment variables and secrets
+- `.git/config` — Git credentials
+- `~/.aws` — Cloud provider credentials
+</Warning>
+
+**Best Practices:**
+
+1. **Workspace Isolation** — Point the agent to a dedicated workspace directory
+2. **Git Hooks** — Use pre-commit hooks to prevent committing secrets
+3. **Secret Scanning** — Run tools like `gitleaks` or `truffleHog`
+4. **File Patterns** — Add sensitive patterns to `.gitignore`
+
+```bash
+# .gitignore
+.env
+.env.*
+*.key
+*.pem
+credentials.json
+User_Vault/
+```
+
+## Content Auto-Classification
+
+The Permission Engine auto-labels content based on pattern matching:
+
+```python
+def classify_content(content: str) -> Sensitivity:
+    """Auto-classify content sensitivity."""
+    content_lower = content.lower()
+    
+    # SECRET patterns
+    if any(pattern in content_lower for pattern in [
+        "api_key", "password", "supabase_key", "trading", ".env"
+    ]):
+        return Sensitivity.SECRET
+    
+    # INTERNAL patterns  
+    if any(pattern in content_lower for pattern in [
+        "session_log", "canonical", "memory_bank"
+    ]):
+        return Sensitivity.INTERNAL
+    
+    # Everything else → PUBLIC
+    return Sensitivity.PUBLIC
+```
+
+## Permission Status
+
+Query the current permission state:
+
+```python
+from athena.core.permissions import get_permissions
+
+perms = get_permissions()
+status = perms.get_status()
+```
+
+**Returns:**
+
+```json
+{
+  "caller_level": "write",
+  "secret_mode": false,
+  "accessible_tools": [
+    {"name": "smart_search", "permission": "read", "sensitivity": "internal"},
+    {"name": "quicksave", "permission": "write", "sensitivity": "internal"}
+  ],
+  "blocked_tools": [],
+  "audit_log_size": 42
+}
+```
+
+## Tool Manifest
+
+Get a manifest of all tools with their permission requirements:
+
+```python
+manifest = perms.get_tool_manifest()
+```
+
+**Returns:**
+
+```json
+[
+  {
+    "name": "smart_search",
+    "permission": "read",
+    "sensitivity": "internal",
+    "accessible": true
+  },
+  {
+    "name": "set_secret_mode",
+    "permission": "admin",
+    "sensitivity": null,
+    "accessible": false
+  }
+]
+```
+
+## Implementation Reference
+
+See `src/athena/core/permissions.py` for the full Permission Engine implementation and `docs/SECURITY.md:29` for the complete security documentation.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="MCP Server" icon="server" href="/advanced/mcp-server">
+    Learn how tools are exposed via MCP protocol
+  </Card>
+  <Card title="Governance" icon="shield-check" href="/advanced/governance">
+    Understand Triple-Lock protocol enforcement
+  </Card>
+</CardGroup>

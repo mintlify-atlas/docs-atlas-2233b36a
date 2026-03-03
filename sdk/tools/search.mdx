@@ -1,0 +1,358 @@
+---
+title: Hybrid Search
+description: Multi-source RAG orchestrator with weighted RRF fusion and optional reranking
+---
+
+The hybrid search tool orchestrates retrieval across multiple data sources and fuses results using weighted Reciprocal Rank Fusion (RRF).
+
+## Overview
+
+Located at `src/athena/tools/search.py`, this module provides:
+
+- Parallel collection from 8+ data sources
+- Weighted RRF score fusion
+- Optional cross-encoder reranking
+- Exact and semantic caching
+- Confidence-based filtering
+
+## Function Signature
+
+```python
+def run_search(
+    query: str,
+    limit: int = 10,
+    strict: bool = False,
+    rerank: bool = False,
+    debug: bool = False,
+    json_output: bool = False,
+    include_personal: bool = False,
+    skills_only: bool = False,
+) -> None
+```
+
+### Parameters
+
+- `query` - Search query string
+- `limit` - Maximum number of results to return (default: 10)
+- `strict` - Filter out low-confidence results below `CONFIDENCE_MED` threshold
+- `rerank` - Enable semantic reranking with cross-encoder
+- `debug` - Show detailed signal information
+- `json_output` - Output results as JSON instead of human-readable format
+- `include_personal` - Include results from personal domain (default: excluded)
+- `skills_only` - Restrict search to `.agent/skills/` directory
+
+## Data Sources
+
+Search collects from the following sources in parallel:
+
+### 1. Canonical (`collect_canonical`)
+
+Searches `CANONICAL.md` for keyword matches. Requires 2+ keyword hits per line.
+
+```python:src/athena/tools/search.py
+def collect_canonical(query: str) -> list[SearchResult]:
+    """Collect matches from CANONICAL.md — requires 2+ keyword hits per line."""
+    # Filters stopwords, scores by keyword density
+    # Returns top 3 results
+```
+
+**Weight:** 2.0
+
+### 2. Tags (`collect_tags`)
+
+Searches sharded tag indexes using `grep` for exact matches.
+
+```python:src/athena/tools/search.py
+def collect_tags(query: str) -> list[SearchResult]:
+    """Collect exact tag matches from sharded indexes."""
+    # Uses subprocess.run with grep for speed
+    # Returns up to 10 matches per shard
+```
+
+**Weight:** 2.2
+
+### 3. Vectors (`collect_vectors`)
+
+Semantic search across multiple vector collections in Supabase:
+
+```python:src/athena/tools/search.py
+def collect_vectors(
+    query: str,
+    limit: int = 20,
+    embedding: list[float] | None = None,
+    exclude_domains: list[str] | None = None,
+    skills_only: bool = False,
+) -> list[SearchResult]:
+    """Collect semantic matches via Supabase"""
+```
+
+**Collections searched:**
+
+- `case_study` (weight: 3.0)
+- `session` (weight: 3.0)
+- `protocol` (weight: 2.8)
+- `capability` (weight: 1.8)
+- `playbook` (weight: 1.8)
+- `workflow` (weight: 1.8)
+- `entity` (weight: 1.8)
+- `reference` (weight: 1.8)
+- `framework` (weight: 2.3)
+- `user_profile` (weight: 2.5)
+- `system_doc` (weight: 1.8)
+
+### 4. GraphRAG (`collect_graphrag`)
+
+Searches knowledge graph entities and communities via `query_graphrag.py` subprocess.
+
+```python:src/athena/tools/search.py
+def collect_graphrag(query: str, limit: int = 5) -> list[SearchResult]:
+    """Collect entity and community matches via query_graphrag.py subprocess."""
+    # Runs with --global-only flag for speed
+    # 5-second timeout
+```
+
+**Weight:** 2.5
+
+### 5. Filenames (`collect_filenames`)
+
+Searches project files by name using `find` command.
+
+```python:src/athena/tools/search.py
+def collect_filenames(query: str) -> list[SearchResult]:
+    """Collect filename matches in Project Root — splits query into keyword tokens."""
+    # Scores by keyword density in filename
+    # Returns top 10
+```
+
+**Weight:** 2.0
+
+### 6. Framework Docs (`collect_framework_docs`)
+
+Searches `.framework/` and `.context/memory_bank/` directories.
+
+**Weight:** 2.5
+
+### 7. SQLite (`collect_sqlite`)
+
+Fallback search in local `athena.db` index.
+
+**Weight:** 1.5
+
+### 8. Exocortex (`collect_exocortex`)
+
+Searches Wikipedia abstracts via FTS5 index.
+
+**Weight:** 1.5
+
+## RRF Fusion Algorithm
+
+Weighted Reciprocal Rank Fusion combines rankings from multiple sources:
+
+```python:src/athena/tools/search.py
+def weighted_rrf(
+    ranked_lists: dict[str, list[SearchResult]], k: int = 60
+) -> list[SearchResult]:
+    fused_scores = defaultdict(float)
+    
+    for source, docs in ranked_lists.items():
+        weight = WEIGHTS.get(source, 1.0)
+        for rank, doc in enumerate(docs, start=1):
+            score_mod = 0.5 + doc.score  # Range: 0.5 to 1.5
+            contrib = weight * score_mod * (1.0 / (k + rank))
+            fused_scores[doc.id] += contrib
+    
+    return sorted(fused_scores.items(), key=lambda x: x[1], reverse=True)
+```
+
+### RRF Formula
+
+For each document:
+
+```
+RRF_score = Σ (weight_source × score_mod × 1/(k + rank_source))
+```
+
+Where:
+- `k = 60` (RRF constant)
+- `score_mod = 0.5 + original_score` (dynamic boost)
+- `weight_source` = source-specific weight from `WEIGHTS` dict
+
+## Caching
+
+### Exact Cache
+
+Matches query string + parameters:
+
+```python
+cache_key = f"{query}|{limit}|{strict}|{rerank}|{skills_only}"
+cached_results = cache.get(cache_key)
+```
+
+### Semantic Cache
+
+Matches by embedding similarity (fallback when exact miss):
+
+```python
+query_embedding = get_embedding(query)
+semantic_hit = cache.get_semantic(query_embedding)
+```
+
+## Optimization Features
+
+### God Mode
+
+Aggressive latency optimization enabled by default:
+
+```python:src/athena/tools/search.py
+GOD_MODE = True
+
+if GOD_MODE:
+    mid_limit = 3  # vs 5 in normal mode
+    low_limit = 3  # vs 5 in normal mode
+    timeout = 5    # vs 8 in normal mode
+```
+
+### Low Entropy Detection
+
+Skips deep vector retrieval for short, generic queries:
+
+```python:src/athena/tools/search.py
+word_count = len(query.split())
+is_low_entropy = word_count < 5 and not any(
+    x in query.lower() for x in ["protocol", "session", "case study", "cs-"]
+)
+
+if is_low_entropy:
+    print("⚡ Low Entropy Query: Skipping deep retrieval")
+```
+
+### Parallel Collection
+
+All sources collected concurrently with timeout:
+
+```python:src/athena/tools/search.py
+with ThreadPoolExecutor(max_workers=len(collection_tasks)) as executor:
+    done, not_done = wait(
+        future_to_source.keys(), 
+        timeout=5,  # God Mode timeout
+        return_when=ALL_COMPLETED
+    )
+```
+
+## Reranking
+
+Optional semantic reranking with cross-encoder:
+
+```python
+if rerank and fused_results:
+    from athena.tools.reranker import rerank_results
+    candidates = fused_results[:25]
+    fused_results = rerank_results(query, candidates, top_k=limit)
+```
+
+## Confidence Filtering
+
+Results are tagged with confidence badges:
+
+```python:src/athena/tools/search.py
+CONFIDENCE_HIGH = 0.03
+CONFIDENCE_MED = 0.02
+CONFIDENCE_LOW = 0.01
+
+if strict:
+    fused_results = [r for r in fused_results if r.rrf_score >= CONFIDENCE_MED]
+```
+
+## CLI Usage
+
+### Basic Search
+
+```bash
+python -m athena.tools.search "trend continuation patterns"
+```
+
+### With Reranking
+
+```bash
+python -m athena.tools.search "risk management" --rerank --limit 5
+```
+
+### Strict Mode
+
+```bash
+python -m athena.tools.search "protocol 137" --strict
+```
+
+### JSON Output
+
+```bash
+python -m athena.tools.search "trading psychology" --json
+```
+
+### Debug Mode
+
+```bash
+python -m athena.tools.search "case studies" --debug
+```
+
+## Output Format
+
+### Human-Readable
+
+```
+🔍 SMART SEARCH (Parallel Hybrid RRF): "trading risk management"
+============================================================
+
+<athena_grounding>
+
+🏆 TOP 10 RESULTS:
+
+  1. [HIGH] [RRF:0.0421] Protocol 49: Risk Management Framework
+     📁 .agent/skills/protocols/049-risk-management.md
+
+  2. [MED] [RRF:0.0287] Case Study: Position Sizing Analysis
+     📁 .context/case_studies/cs-002.md
+```
+
+### JSON
+
+```json
+{
+  "results": [
+    {
+      "id": "Protocol 49: Risk Management Framework",
+      "content": "Risk management protocol for...",
+      "source": "protocol",
+      "score": 0.95,
+      "rrf_score": 0.0421,
+      "metadata": {
+        "path": ".agent/skills/protocols/049-risk-management.md",
+        "type": "protocol"
+      },
+      "signals": {
+        "protocol": {"rank": 1, "contrib": 0.0287}
+      }
+    }
+  ],
+  "suppressed": 0
+}
+```
+
+## Performance
+
+- **Cold start:** ~800ms (vector embedding fetch)
+- **Warm (exact cache hit):** ~5ms
+- **Warm (semantic cache hit):** ~200ms
+- **Collection timeout:** 5s (God Mode) / 8s (normal)
+- **GraphRAG timeout:** 5s
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Agentic Search" icon="brain" href="/sdk/tools/agentic-search">
+    Multi-step query decomposition
+  </Card>
+  <Card title="Search Models" icon="database" href="/sdk/core/models">
+    SearchResult data structure
+  </Card>
+</CardGroup>

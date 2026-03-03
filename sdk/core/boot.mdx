@@ -1,0 +1,380 @@
+---
+title: Boot Orchestrator
+description: Modular boot sequence orchestrator for Athena sessions
+---
+
+# Boot Orchestrator
+
+The `athena.boot.orchestrator` module provides a modular, parallelized boot sequence that replaces the monolithic `.agent/scripts/boot.py`.
+
+## Architecture
+
+The boot process is broken into discrete loaders, each responsible for a specific initialization phase:
+
+```python
+from athena.boot.loaders.ui import UILoader
+from athena.boot.loaders.state import StateLoader
+from athena.boot.loaders.identity import IdentityLoader
+from athena.boot.loaders.memory import MemoryLoader
+from athena.boot.loaders.system import SystemLoader
+from athena.boot.loaders.prefetch import PrefetchLoader
+```
+
+## Boot Phases
+
+### Phase 0: Pre-flight
+
+```python
+StateLoader.enable_watchdog()
+UILoader.divider("⚡ ATHENA BOOT SEQUENCE")
+```
+
+**Actions:**
+- Enable crash watchdog
+- Display boot banner
+
+### Phase 1: Environment Verification
+
+```python
+SystemLoader.verify_environment()
+SystemLoader.enforce_daemon()
+StateLoader.check_prior_crashes()
+StateLoader.check_canary_overdue()
+```
+
+**Actions:**
+- Verify Python version, dependencies
+- Ensure daemon is running
+- Check for crash artifacts
+- Verify canary file freshness
+
+### Phase 1.1: Security Patch
+
+```python
+from athena.core.security import patch_dspy_cache_security
+patch_dspy_cache_security()
+```
+
+**Actions:**
+- Apply CVE-2025-69872 mitigation (DiskCache security)
+
+### Phase 1.5: System Sync
+
+```python
+SystemLoader.sync_ui()
+# Update last boot timestamp
+last_boot_log = PROJECT_ROOT / ".agent" / "state" / "last_boot.log"
+last_boot_log.write_text(datetime.now().isoformat())
+```
+
+### Phase 2: Identity Verification
+
+```python
+if not IdentityLoader.verify_semantic_prime():
+    return 1  # Boot failure
+```
+
+**Actions:**
+- Verify `Core_Identity.md` integrity via SHA-384 hash
+- Compare against expected hash: `EXPECTED_CORE_HASH`
+- Refuse to boot on mismatch
+
+**Expected Hash:**
+```python
+EXPECTED_CORE_HASH = "377a465a475ee9440db183fe93437fba..."
+```
+
+### Phase 3: Memory Recall
+
+```python
+last_session = MemoryLoader.recall_last_session()
+```
+
+**Actions:**
+- Display summary of last session
+- Extract deferred action items
+- Show focus area from previous session
+
+### Phase 3.5: Token Budget Check
+
+```python
+from athena.boot.loaders.token_budget import (
+    measure_boot_files,
+    auto_compact_if_needed
+)
+
+token_counts = measure_boot_files()
+token_counts = auto_compact_if_needed(token_counts)
+```
+
+**Actions:**
+- Measure token usage of boot files
+- Auto-compact if exceeds threshold
+
+### Phase 4: Session Creation
+
+```python
+session_id = MemoryLoader.create_session()
+```
+
+**Actions:**
+- Create new session log in `.context/memories/session_logs/`
+- Format: `YYYY-MM-DD-session-XX.md`
+
+### Phase 5: Audit Reset
+
+```python
+from semantic_audit import reset_audit
+reset_audit()
+```
+
+### Phase 6-7: Parallel Context Loading
+
+The boot sequence uses `ThreadPoolExecutor` to parallelize expensive operations:
+
+```python
+from concurrent.futures import ThreadPoolExecutor
+
+with ThreadPoolExecutor(max_workers=8) as executor:
+    # 1. Non-blocking context capture
+    executor.submit(MemoryLoader.capture_context)
+    
+    # 2. Semantic priming (most expensive)
+    executor.submit(MemoryLoader.prime_semantic)
+    
+    # 3. Protocol injection
+    executor.submit(IdentityLoader.inject_auto_protocols, "startup session boot")
+    
+    # 4. Search cache pre-warming
+    executor.submit(MemoryLoader.prewarm_search_cache)
+    
+    # 5. System health check
+    executor.submit(HealthCheck.run_all)
+    
+    # 6. Prefetch hot files
+    executor.submit(PrefetchLoader.prefetch_hot_files)
+    
+    # 7. Context summary pre-computation
+    executor.submit(generate_summaries)
+```
+
+**Parallelization Benefits:**
+- Reduces boot time from ~45s to ~12s
+- Maximizes CPU utilization during I/O-bound operations
+- Non-blocking health checks and cache warming
+
+### Phase 8: Sidecar Launch
+
+```python
+import subprocess
+
+sidecar_path = PROJECT_ROOT / ".agent" / "scripts" / "sidecar.py"
+subprocess.Popen(
+    [sys.executable, str(sidecar_path)],
+    stdout=subprocess.DEVNULL,
+    stderr=subprocess.DEVNULL,
+)
+```
+
+**Sidecar Responsibilities:**
+- Sovereign index maintenance
+- Background sync operations
+
+### Final: Display Summary
+
+```python
+StateLoader.disable_watchdog()
+display_gauge(token_counts)
+print(f"⚡ Ready. Session: {session_id}")
+```
+
+## Loaders Reference
+
+### UILoader
+
+```python
+class UILoader:
+    @staticmethod
+    def divider(text: str):
+        """Display a formatted section divider."""
+```
+
+### StateLoader
+
+```python
+class StateLoader:
+    @staticmethod
+    def enable_watchdog():
+        """Enable crash watchdog for boot sequence."""
+    
+    @staticmethod
+    def disable_watchdog():
+        """Disable watchdog after successful boot."""
+    
+    @staticmethod
+    def check_prior_crashes():
+        """Check for crash artifacts from previous sessions."""
+    
+    @staticmethod
+    def check_canary_overdue():
+        """Verify canary file is fresh (within 24h)."""
+```
+
+### IdentityLoader
+
+```python
+class IdentityLoader:
+    @staticmethod
+    def verify_semantic_prime() -> bool:
+        """Verify Core_Identity.md integrity via SHA-384."""
+    
+    @staticmethod
+    def inject_auto_protocols(context_clues: str):
+        """Auto-inject protocols based on context tags."""
+    
+    @staticmethod
+    def display_cognitive_profile():
+        """Display Athena's cognitive identity and modes."""
+    
+    @staticmethod
+    def display_cos_status():
+        """Display Committee of Seats (COS) initialization."""
+```
+
+### MemoryLoader
+
+```python
+class MemoryLoader:
+    @staticmethod
+    def recall_last_session() -> str:
+        """Display summary of last session with context handoff."""
+    
+    @staticmethod
+    def create_session() -> str:
+        """Create a new session log and return session ID."""
+    
+    @staticmethod
+    def capture_context():
+        """Output current date/time context."""
+    
+    @staticmethod
+    def prime_semantic():
+        """Run semantic search to prime cache."""
+    
+    @staticmethod
+    def prewarm_search_cache():
+        """Pre-run common queries to populate cache."""
+    
+    @staticmethod
+    def display_learnings_snapshot():
+        """Show recent user preferences and learnings."""
+```
+
+### SystemLoader
+
+```python
+class SystemLoader:
+    @staticmethod
+    def verify_environment():
+        """Check Python version, dependencies, etc."""
+    
+    @staticmethod
+    def enforce_daemon():
+        """Ensure athenad is running."""
+    
+    @staticmethod
+    def sync_ui():
+        """Sync UI state and preferences."""
+```
+
+### PrefetchLoader
+
+```python
+class PrefetchLoader:
+    @staticmethod
+    def prefetch_hot_files():
+        """Pre-load frequently accessed files into memory."""
+```
+
+## Usage
+
+### Standard Boot
+
+```bash
+python3 -m athena.boot.orchestrator
+```
+
+### Verify Mode
+
+```bash
+python3 -m athena.boot.orchestrator --verify
+```
+
+## Configuration
+
+### Boot Timeout
+
+```python
+from athena.boot.constants import BOOT_TIMEOUT_SECONDS
+
+BOOT_TIMEOUT_SECONDS = 90  # Maximum boot time
+```
+
+### Expected Core Hash
+
+To update the expected hash after legitimate changes to `Core_Identity.md`:
+
+```python
+import hashlib
+from athena.boot.constants import CORE_IDENTITY
+
+content = CORE_IDENTITY.read_bytes()
+new_hash = hashlib.sha384(content).hexdigest()
+print(f"New hash: {new_hash}")
+```
+
+Update `EXPECTED_CORE_HASH` in `athena/boot/constants.py`.
+
+## Error Handling
+
+### Boot Failure (Identity Mismatch)
+
+```
+============================================================
+🚨 SEMANTIC PRIME INTEGRITY FAILURE 🚨
+Expected: 377a465a475ee9440db183fe93437fba...
+Actual:   f1a2b3c4d5e6f7a8b9c0d1e2f3a4b5c6...
+REFUSING TO BOOT. Manual review required.
+```
+
+**Resolution:**
+1. Review changes to `Core_Identity.md`
+2. If legitimate, update `EXPECTED_CORE_HASH`
+3. If unauthorized, restore from backup
+
+### Crash Detection
+
+```
+⚠️  Prior crash detected. Review logs:
+  .agent/state/crash_report.json
+```
+
+## Performance Metrics
+
+**Boot Time Breakdown (Parallelized):**
+- Phase 0-1: ~2s (environment verification)
+- Phase 2: ~0.5s (identity check)
+- Phase 3-7: ~8s (parallel context loading)
+- Phase 8: ~1s (sidecar launch)
+- **Total: ~12s**
+
+**Sequential (Legacy):**
+- Total: ~45s
+
+**Speedup: 3.75x**
+
+## See Also
+
+- [Core Overview](/sdk/core/overview)
+- [Configuration](/sdk/core/config)
+- [Permissions](/sdk/core/permissions)

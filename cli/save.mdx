@@ -1,0 +1,305 @@
+---
+title: "athena save"
+description: "Quicksave a checkpoint to your current session log"
+---
+
+Append a timestamped checkpoint to the current session log. Use this to create save points throughout your work session for better context continuity.
+
+## Usage
+
+```bash
+athena save [SUMMARY] [OPTIONS]
+```
+
+## Arguments
+
+<ParamField path="summary" type="string" optional>
+  Brief description of the checkpoint. If multiple words are provided, they are joined with spaces.
+  
+  If omitted, defaults to "Checkpoint".
+</ParamField>
+
+## Options
+
+<ParamField path="--root" type="path">
+  Specify project root directory (auto-detected if not provided)
+</ParamField>
+
+## Examples
+
+### Basic Checkpoint
+
+```bash
+athena save "Implemented user authentication"
+```
+
+**Output:**
+```
+✅ Quicksave [14:23] → 2026-03-03-session-12.md
+```
+
+### Checkpoint Without Message
+
+```bash
+athena save
+```
+
+**Output:**
+```
+✅ Quicksave [14:25] → 2026-03-03-session-12.md
+```
+
+Appends "Checkpoint" as the default message.
+
+### Multi-Word Summary
+
+```bash
+athena save Fixed API rate limiting bug in webhook handler
+```
+
+**Output:**
+```
+✅ Quicksave [14:28] → 2026-03-03-session-12.md
+```
+
+<Tip>
+  No quotes needed - all arguments after `save` are automatically joined into the summary.
+</Tip>
+
+### Specify Root Directory
+
+```bash
+athena save "Database migration complete" --root /path/to/workspace
+```
+
+## What Gets Saved
+
+Each checkpoint is appended to the current day's session log:
+
+```markdown
+### ⚡ Checkpoint [14:23]
+Implemented user authentication
+```
+
+**Format:**
+- `###` heading level for easy scanning
+- ⚡ emoji for quick visual identification
+- `[HH:MM]` timestamp for temporal context
+- Your custom summary message
+
+## Session Log Location
+
+Checkpoints are written to the most recent session log in one of these locations (searched in order):
+
+1. `{project_root}/session_logs/`
+2. `{project_root}/.context/memories/session_logs/`
+
+The command finds the latest file matching:
+```
+YYYY-MM-DD-session-*.md
+```
+
+For example: `2026-03-03-session-12.md`
+
+## Auto-Discovery
+
+The project root is automatically discovered by searching upward from the current directory for:
+
+1. `.athena_root` marker file (created by `athena init`)
+2. `pyproject.toml` (Python project)
+3. `.git/` directory (Git repository)
+
+If none are found, uses the current working directory.
+
+## Common Workflows
+
+### Periodic Saves During Development
+
+```bash
+# Start session
+athena
+
+# Work on feature...
+athena save "Designed database schema for notifications"
+
+# More work...
+athena save "Implemented notification service"
+
+# Testing...
+athena save "All unit tests passing"
+
+# End session
+athena --end
+```
+
+### Pre-Commit Checkpoints
+
+```bash
+# Before committing major changes
+athena save "About to refactor auth module"
+git add .
+git commit -m "Refactor authentication"
+athena save "Refactor complete and committed"
+```
+
+### Experiment Tracking
+
+```bash
+athena save "Baseline: API latency 450ms"
+# ... optimization work ...
+athena save "After caching: API latency 180ms"
+# ... more optimization ...
+athena save "After indexing: API latency 95ms"
+```
+
+## Session End
+
+To close a session and trigger full shutdown:
+
+```bash
+athena --end
+```
+
+This runs the shutdown sequence which:
+1. Closes the current session log
+2. Updates session status to "Closed"
+3. Optionally triggers Supabase sync
+4. Commits session log to git (if configured)
+
+## Error Handling
+
+### No Session Found
+
+**Error:**
+```
+⚠️ No session log found for today
+   (Run /start or `python -m athena` first to create a session)
+```
+
+**Solution:**
+Boot a session first:
+```bash
+athena
+```
+
+### Wrong Directory
+
+**Symptom:**
+```
+⚠️ No session log found for today
+```
+
+**Solution:**
+Navigate to your workspace root:
+```bash
+cd /path/to/athena-workspace
+athena save "Your message"
+```
+
+Or explicitly specify the root:
+```bash
+athena save "Your message" --root /path/to/workspace
+```
+
+## Exit Codes
+
+| Code | Meaning |
+|:-----|:--------|
+| `0` | Checkpoint saved successfully |
+| `1` | No session log found or write failed |
+
+## Direct Script Usage
+
+The save command can also be invoked as a Python module:
+
+```bash
+python -m athena.cli.save "Your checkpoint message"
+```
+
+Or imported in scripts:
+
+```python
+from athena.cli.save import run_quicksave
+
+success = run_quicksave(
+    summary="Automated checkpoint",
+    project_root=Path("/path/to/workspace")
+)
+```
+
+## Best Practices
+
+### Checkpoint Frequency
+
+- **Too few:** Risk losing context between long work sessions
+- **Too many:** Creates noise in session log
+- **Just right:** Every major milestone or decision point
+
+**Good checkpoint rhythm:**
+```bash
+athena save "Initial research complete"
+# ... 20-30 minutes of work ...
+athena save "API design finalized"
+# ... implementation ...
+athena save "Core implementation done, starting tests"
+# ... testing ...
+athena save "All tests passing, ready for review"
+```
+
+### Descriptive Summaries
+
+<CodeGroup>
+```bash Good - Action-oriented
+athena save "Fixed race condition in payment processor"
+athena save "Refactored user service to use repository pattern"
+athena save "Added validation for email domains"
+```
+
+```bash Avoid - Too vague
+athena save "made changes"
+athena save "stuff"
+athena save "update"
+```
+</CodeGroup>
+
+### Use Present or Past Tense Consistently
+
+```bash
+# Past tense (recommended)
+athena save "Implemented caching layer"
+athena save "Fixed bug in webhook handler"
+
+# Or present tense
+athena save "Implementing caching layer"
+athena save "Fixing bug in webhook handler"
+```
+
+## Integration with Workflows
+
+In `.agent/workflows/save.md`, you can reference this command:
+
+```markdown
+---
+description: Save a checkpoint to the current session
+---
+
+# /save — Quicksave Checkpoint
+
+> **Automation**: This workflow runs the Athena SDK save command.
+
+## Execution
+
+// turbo
+
+```bash
+athena save "Brief summary of what happened"
+```
+
+The save command will append a timestamped checkpoint to the current session log.
+```
+
+## Related Commands
+
+- [athena](/cli/overview#default-boot) - Boot a new session
+- `athena --end` - Close session and run shutdown sequence
+- [athena check](/cli/check) - Verify workspace health

@@ -1,0 +1,228 @@
+---
+title: "athena init"
+description: "Initialize a new Athena workspace with directory structure and templates"
+---
+
+Scaffold a complete Athena workspace in under 30 seconds. Creates the required directory structure, template files, and optional IDE-specific configuration.
+
+## Usage
+
+```bash
+athena init [TARGET] [OPTIONS]
+```
+
+## Arguments
+
+<ParamField path="target" type="path" optional>
+  Target directory to initialize. Use `.` for current directory. If omitted and `--here` is not specified, initializes in current directory.
+</ParamField>
+
+## Options
+
+<ParamField path="--here" type="flag">
+  Initialize in current directory (alias for `athena init .`)
+</ParamField>
+
+<ParamField path="--ide" type="string">
+  Generate IDE-specific configuration files
+  
+  **Choices:** `antigravity`, `cursor`, `vscode`, `gemini`, `kilocode`, `roocode`
+</ParamField>
+
+## Examples
+
+### Initialize in Current Directory
+
+```bash
+athena init .
+```
+
+**Output:**
+```
+🏛️  ATHENA INIT
+============================================================
+
+📁 Creating directories...
+   ✅ .agent/workflows/
+   ✅ .agent/scripts/
+   ✅ .agent/skills/protocols/
+   ✅ .framework/modules/
+   ✅ .context/memories/session_logs/
+   ✅ .context/data/
+   ✅ .athena_root (workspace marker)
+
+📝 Creating template files...
+   ✅ .framework/modules/Core_Identity.md
+   ✅ .agent/workflows/start.md
+   ✅ .agent/workflows/end.md
+   ✅ .agent/workflows/save.md
+   ✅ .context/project_state.md
+
+============================================================
+✅ ATHENA WORKSPACE INITIALIZED
+============================================================
+
+🚀 Next steps:
+   1. Open this folder in your AI IDE
+   2. Type "/start" to boot your agent
+   3. Work with your agent, then type "/end" to save
+```
+
+### Initialize with Cursor Config
+
+```bash
+athena init . --ide cursor
+```
+
+Creates `.cursor/rules.md` with Athena-specific agent instructions.
+
+### Initialize with Antigravity Config
+
+```bash
+athena init --here --ide antigravity
+```
+
+Creates `AGENTS.md` with Athena workspace context.
+
+### Initialize New Project Directory
+
+```bash
+athena init my-agent-project
+```
+
+<Warning>
+  This will create a new directory called `my-agent-project`. Currently, the target directory must exist first.
+</Warning>
+
+## Directory Structure
+
+The init command creates the following structure:
+
+```
+.
+├── .athena_root                    # Workspace marker for path discovery
+├── .agent/
+│   ├── workflows/                  # Workflow definitions (start, end, save)
+│   ├── scripts/                    # Automation scripts
+│   └── skills/
+│       └── protocols/              # Skill protocols and patterns
+├── .framework/
+│   └── modules/
+│       └── Core_Identity.md        # Agent identity and operating principles
+└── .context/
+    ├── project_state.md            # Single source of truth for project status
+    ├── data/                       # Structured data storage
+    └── memories/
+        └── session_logs/           # Session log archive
+```
+
+## Template Files
+
+### Core Identity
+
+`.framework/modules/Core_Identity.md` defines your agent's:
+- Operating principles
+- Reasoning standards
+- Memory-first approach
+- Success metrics
+
+### Workflow Templates
+
+Three essential workflows are created:
+
+1. **start.md** - Boot sequence
+2. **end.md** - Session close and save
+3. **save.md** - Quicksave checkpoint
+
+### Project State
+
+`.context/project_state.md` tracks:
+- System health status
+- Session count
+- Recent changes
+- Project-specific notes
+
+## IDE-Specific Configuration
+
+### Antigravity (`--ide antigravity`)
+
+Creates `AGENTS.md` with:
+- Boot sequence: `athena`
+- Save sequence: `athena --end`
+- Quicksave: `athena save "summary"`
+- Directory context guide
+
+### Cursor (`--ide cursor`)
+
+Creates `.cursor/rules.md` with:
+- Athena workspace context
+- Key directory explanations
+- Session discipline workflow
+- Boot command instructions
+
+### VS Code (`--ide vscode`)
+
+Creates `.vscode/settings.json` with:
+- Markdown file associations
+- Word wrap enabled
+- Python cache exclusions
+- Markdown preview settings
+
+### Gemini (`--ide gemini`)
+
+Creates `.gemini/AGENTS.md` with:
+- Workspace context
+- Directory structure guide
+- Session command table
+- Quick reference
+
+### Kilo Code (`--ide kilocode`)
+
+Creates `.kilocode/rules/athena.md` with:
+- Full context guide
+- Slash command reference
+- Session discipline
+- Boot instructions
+
+### Roo Code (`--ide roocode`)
+
+Creates `.roo/rules/athena.md` with:
+- Workspace operating principles
+- Slash command table
+- Session workflow
+- Directory context
+
+## Exit Codes
+
+| Code | Meaning |
+|:-----|:--------|
+| `0` | Workspace initialized successfully |
+| `1` | Initialization failed |
+
+## Next Steps
+
+After initializing your workspace:
+
+<Steps>
+  <Step title="Open in your IDE">
+    Open the initialized directory in your AI-powered IDE (Cursor, Windsurf, etc.)
+  </Step>
+  
+  <Step title="Boot your agent">
+    Run `athena` or type `/start` in your IDE
+  </Step>
+  
+  <Step title="Verify setup">
+    Run `athena check` to verify the workspace is properly configured
+  </Step>
+  
+  <Step title="Start building">
+    Begin your first session and let your agent learn your patterns
+  </Step>
+</Steps>
+
+## Related Commands
+
+- [athena check](/cli/check) - Verify workspace health
+- [athena doctor](/cli/doctor) - Run comprehensive diagnostics
+- [athena save](/cli/save) - Create session checkpoints

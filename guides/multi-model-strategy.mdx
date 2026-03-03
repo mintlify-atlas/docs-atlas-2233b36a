@@ -1,0 +1,339 @@
+---
+title: Multi-Model Strategy
+description: Route different tasks to different AI models for optimal performance and cost efficiency
+---
+
+Athena is **model-agnostic** — your memory, protocols, and governance persist across any LLM. This means you can use different models for different tasks and get the best of each.
+
+## Why Multi-Model?
+
+Not all tasks require frontier model capabilities. By routing intelligently, you can:
+
+- **Reduce costs** by 50% while maintaining quality where it matters
+- **Increase speed** by using fast models for mechanical work
+- **Cross-validate** important decisions across multiple models
+- **Leverage strengths** of different model architectures
+
+---
+
+## Recommended Models
+
+### Frontier Models (Deep Reasoning)
+
+| Model | Strengths | Best Used For |
+|:------|:----------|:--------------|
+| **Claude Opus 4.6** | Deep reasoning, code quality, nuanced analysis | Coding, architecture, verification |
+| **Gemini 3.1 Pro** | Broad knowledge, fast synthesis, strong planning | General work, research, planning |
+| **GPT-5.3** | Alternative perspective, creative tasks | Trilateral tiebreaker, creative work |
+
+### Fast Models (Mechanical Work)
+
+| Model | Strengths | Best Used For |
+|:------|:----------|:--------------|
+| **Gemini 3 Flash** | Speed, low cost | Session management (`/start`, `/end`), quick lookups |
+
+---
+
+## Cost Considerations
+
+<Info>
+**Athena is free and open source.** You only pay for your AI subscription.
+
+Recommended plans:
+- **Claude Pro / Google AI Pro**: ~$20/mo (full access to frontier models)
+- **Claude Max / Google AI Ultra**: $200–250/mo (extended limits for power users)
+</Info>
+
+### Why Invest in Frontier Models?
+
+Athena's protocols — governance, reasoning depth, structured workflows — are designed for models that can follow complex multi-step instructions. Smaller/free models may struggle to follow them consistently.
+
+**This is a long-term investment, not a cost.** Frontier models dramatically increase your output quality and consistency.
+
+---
+
+## The Routing Table
+
+Route tasks based on complexity and risk:
+
+| Task Type | Recommended Tier | Why |
+|:----------|:-----------------|:----|
+| **Session Management** (`/start`, `/end`, `/save`) | ⚡ Fast (Gemini Flash) | Mechanical execution, low reasoning needed |
+| **Coding & Implementation** | 🔥 Frontier (Claude Opus, Gemini Pro) | Code quality scales directly with model capability |
+| **Planning & Architecture** | 🔥 Frontier | Design decisions compound — invest best reasoning here |
+| **General Chat & Q&A** | 🧠 Strong (Gemini Pro) | Good enough for most queries |
+| **Research & Deep Analysis** | 🔥 Frontier | Synthesis quality degrades with weaker models |
+| **Creative & Brainstorming** | 🧠 Strong or 🔥 Frontier | Use Strong for volume, Frontier for refinement |
+| **Verification & Code Review** | 🔥 Frontier (different model) | Use different model than author for fresh perspective |
+| **Quick Lookups & Formatting** | ⚡ Fast | Don't waste Frontier tokens on simple tasks |
+
+---
+
+## The Trilateral Feedback Loop
+
+When two models disagree on a significant decision, bring in a third:
+
+```text
+Model A (Gemini 3.1 Pro)  →  Opinion 1
+Model B (Claude Opus)     →  Opinion 2
+                               ↓
+                         Conflict detected?
+                               ↓
+Model C (GPT-5.3, Llama)  →  Tiebreaker / Synthesis
+```
+
+### When to Trigger
+
+<CardGroup cols={2}>
+  <Card title="Architecture decisions" icon="building">
+    Choices with long-term consequences that are expensive to reverse
+  </Card>
+  
+  <Card title="Risk assessments" icon="shield">
+    When models disagree on severity or probability
+  </Card>
+  
+  <Card title="Strategy choices" icon="chess">
+    Both options seem equally valid but lead to different outcomes
+  </Card>
+  
+  <Card title="High-stakes decisions" icon="triangle-exclamation">
+    Any decision where the cost of being wrong is high
+  </Card>
+</CardGroup>
+
+### When NOT to Trigger
+
+- Style preferences (just pick one)
+- Low-stakes choices (not worth the tokens)
+- When one model's answer is clearly more grounded
+
+---
+
+## Cost Optimization Strategy
+
+**Key insight**: Most of your session is NOT frontier-level work.
+
+| Session Phase | % of Tokens | Model Tier | Cost Impact |
+|:--------------|:------------|:-----------|:------------|
+| `/start` boot | ~5% | ⚡ Fast | Minimal |
+| Exploration & chat | ~40% | 🧠 Strong | Moderate |
+| Core reasoning & coding | ~40% | 🔥 Frontier | Highest |
+| `/end` shutdown | ~5% | ⚡ Fast | Minimal |
+| Verification | ~10% | 🔥 Frontier (alt) | Moderate |
+
+By routing only the high-value 40% to Frontier models, you can **cut effective costs by ~50%** while maintaining output quality where it matters.
+
+---
+
+## Model Switching in Practice
+
+### In Multi-Model IDEs
+
+<Steps>
+  <Step title="Start with Fast model">
+    Use Gemini Flash or similar for `/start` boot scripts and session initialization.
+  </Step>
+  
+  <Step title="Switch to Frontier for complex work">
+    When you hit coding, architecture, or deep analysis tasks, switch to Claude Opus or Gemini 3.1 Pro.
+  </Step>
+  
+  <Step title="Drop back to Strong/Fast for routine tasks">
+    For formatting, file operations, simple Q&A, use lower-tier models.
+  </Step>
+  
+  <Step title="End with Fast model">
+    Run `/end` shutdown scripts with fast model to save tokens.
+  </Step>
+</Steps>
+
+### Cross-IDE Validation
+
+For the trilateral loop, use different IDEs entirely:
+
+<CodeGroup>
+```bash Primary IDE (Gemini)
+# First opinion
+antigravity --model gemini-3.1-pro
+```
+
+```bash Secondary IDE (Claude)
+# Second opinion
+claude-code --model opus-4.6
+```
+
+```bash Tiebreaker (GPT)
+# Third opinion if needed
+chatgpt --model gpt-5.3
+```
+</CodeGroup>
+
+Athena's Markdown-based memory means all three IDEs can read the same context.
+
+---
+
+## Anti-Patterns
+
+| ❌ Don't | ✅ Do Instead |
+|:---------|:-------------|
+| Use Frontier for `/start` and `/end` | Use Fast — it's mechanical work |
+| Use Fast for architecture decisions | Use Frontier — design compounds |
+| Use one model for everything | Route by task type |
+| Skip verification entirely | Use a different model to review critical code |
+| Run trilateral loop on every question | Reserve it for high-stakes disagreements |
+
+---
+
+## Quick Reference Card
+
+```text
+/start, /end, /save       →  ⚡ Fast (Gemini Flash)
+Coding, web dev, apps      →  🔥 Frontier (Claude Opus / Gemini 3.1 Pro)
+Planning, architecture     →  🔥 Frontier (never Fast)
+General chat, Q&A          →  🧠 Strong (Gemini 3.1 Pro), toggle Frontier for depth
+Research, deep analysis    →  🔥 Frontier
+Verification, code review  →  🔥 Frontier (DIFFERENT model than author)
+Conflict resolution        →  🌐 Trilateral Loop (3rd model as tiebreaker)
+Quick lookups, formatting  →  ⚡ Fast
+```
+
+---
+
+## Example Session Workflow
+
+<Steps>
+  <Step title="Session Start (Fast Model)">
+    ```bash
+    # Model: Gemini Flash
+    /start
+    ```
+    
+    Loads Core Identity, userContext, productContext, activeContext (~2K tokens)
+  </Step>
+  
+  <Step title="Planning Phase (Frontier Model)">
+    ```bash
+    # Switch to: Claude Opus
+    /plan "Build user authentication system"
+    ```
+    
+    Deep reasoning for architecture decisions, applies Protocol 123 (Einstein Protocol)
+  </Step>
+  
+  <Step title="Implementation (Frontier Model)">
+    ```bash
+    # Continue with: Claude Opus
+    "Implement JWT authentication with refresh tokens"
+    ```
+    
+    High-quality code generation with security considerations
+  </Step>
+  
+  <Step title="Quick Formatting (Fast Model)">
+    ```bash
+    # Switch to: Gemini Flash
+    "Format this code with prettier"
+    ```
+    
+    Mechanical task, no reasoning needed
+  </Step>
+  
+  <Step title="Verification (Different Frontier Model)">
+    ```bash
+    # Switch to: Gemini 3.1 Pro
+    "Review this authentication code for security issues"
+    ```
+    
+    Fresh perspective catches issues the author model missed
+  </Step>
+  
+  <Step title="Session End (Fast Model)">
+    ```bash
+    # Switch to: Gemini Flash
+    /end
+    ```
+    
+    Synthesizes session, commits changes, updates logs (~600 tokens)
+  </Step>
+</Steps>
+
+---
+
+## Platform-Specific Tips
+
+### Antigravity / Multi-Model IDEs
+
+Most modern agentic IDEs let you switch models mid-session via dropdown or command.
+
+### Claude Code
+
+Use `.clauderc` to define model presets:
+
+```json
+{
+  "modelPresets": {
+    "fast": "claude-3-haiku-20240307",
+    "strong": "claude-3.5-sonnet-20241022",
+    "frontier": "claude-opus-4.6"
+  }
+}
+```
+
+### ChatGPT / OpenAI
+
+Switch models via `--model` flag or web interface.
+
+---
+
+## Cost Savings Example
+
+### Scenario: 8-hour work day, 5 sessions
+
+**Without routing** (all Frontier):
+- 5 sessions × 200K tokens avg = 1M tokens/day
+- Cost: ~$30/day (estimate)
+
+**With routing**:
+- `/start` + `/end`: 10 sessions × 3K tokens = 30K (Fast)
+- Routine work: 400K tokens (Strong)
+- Core work: 400K tokens (Frontier)
+- Verification: 100K tokens (Frontier alt)
+- Total Frontier: 500K tokens/day
+- **Cost savings: ~50%** while maintaining quality
+
+---
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Default to Strong" icon="gauge">
+    Use Strong models (Gemini Pro) for general work. Only escalate to Frontier when needed.
+  </Card>
+  
+  <Card title="Never Fast for architecture" icon="building">
+    Design decisions compound. Always use Frontier models for planning and architecture.
+  </Card>
+  
+  <Card title="Fresh eyes for review" icon="eye">
+    Use a DIFFERENT model to review code than the one that wrote it.
+  </Card>
+  
+  <Card title="Track your patterns" icon="chart-line">
+    Monitor which tasks genuinely benefit from Frontier vs Strong. Adjust routing over time.
+  </Card>
+</CardGroup>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Semantic Search" href="/guides/semantic-search" icon="magnifying-glass">
+    Learn how Athena finds context across your workspace
+  </Card>
+  
+  <Card title="Best Practices" href="/guides/best-practices" icon="star">
+    Operational discipline for running Athena sustainably
+  </Card>
+</CardGroup>

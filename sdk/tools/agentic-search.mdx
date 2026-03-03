@@ -1,0 +1,394 @@
+---
+title: Agentic Search
+description: Multi-step RAG with query decomposition, parallel retrieval, and validation
+---
+
+Agentic Search (v2) decomposes complex queries into sub-queries, executes them in parallel, and validates results against the original intent.
+
+## Overview
+
+Located at `src/athena/tools/agentic_search.py`, this module implements a 4-phase agentic RAG pipeline:
+
+1. **Planner** - Decompose query into 2-4 sub-queries (rule-based NLP)
+2. **Retriever** - Execute sub-queries in parallel via `run_search()`
+3. **Validator** - Deduplicate and validate with cosine similarity
+4. **Synthesizer** - Merge ranked results with provenance tracking
+
+**Key Design:** No LLM required for decomposition (fast, free, deterministic).
+
+## Function Signature
+
+```python
+def agentic_search(
+    query: str,
+    limit: int = 10,
+    validate: bool = True,
+    debug: bool = False,
+) -> Dict[str, Any]
+```
+
+### Parameters
+
+- `query` - Complex search query to decompose
+- `limit` - Maximum results to return (default: 10)
+- `validate` - Enable cosine similarity validation (default: True)
+- `debug` - Show decomposition and provenance details
+
+### Returns
+
+```python
+{
+    "results": list[SearchResult],      # Final ranked results
+    "sub_queries": list[str],           # Decomposed sub-queries
+    "decomposed": bool,                 # Whether decomposition occurred
+    "meta": {
+        "total_candidates": int,        # Total unique documents found
+        "returned": int,                # Number of results returned
+        "sub_query_count": int,         # Number of sub-queries executed
+    }
+}
+```
+
+## Phase 1: Query Decomposition
+
+### Strategy 1: Multi-Question Detection
+
+Detects compound questions:
+
+```python:src/athena/tools/agentic_search.py
+QUESTION_PATTERNS = [
+    (
+        r"(what|how|which|where|when|why)\s+(.+?)\s+and\s+(what|how|which|where|when|why)\s+(.+)",
+        "multi_question",
+    ),
+    (r"(.+?)\s+(?:and|then|also)\s+(.+)", "sequential"),
+]
+```
+
+**Example:**
+```python
+query = "What is trend continuation and how does position sizing work?"
+sub_queries = [
+    "What is trend continuation",
+    "How does position sizing work"
+]
+```
+
+### Strategy 2: Conjunction Splitting
+
+Splits on conjunctions and commas:
+
+```python:src/athena/tools/agentic_search.py
+SPLIT_PATTERNS = [
+    r"\band\b",
+    r"\bor\b",
+    r"\bvs\.?\b",
+    r"\bversus\b",
+    r"\bcompared?\s+to\b",
+    r",\s+(?:and\s+)?",
+]
+```
+
+**Example:**
+```python
+query = "risk management and trading psychology"
+sub_queries = [
+    "risk management and trading psychology",  # Original
+    "risk management",
+    "trading psychology"
+]
+```
+
+### Strategy 3: Keyword Clustering
+
+Fallback for dense single queries:
+
+```python:src/athena/tools/agentic_search.py
+tokens = [w for w in query.split() if w.lower() not in STOPWORDS and len(w) > 2]
+if len(tokens) >= 4:
+    mid = len(tokens) // 2
+    sub_queries = [
+        " ".join(tokens[:mid]),
+        " ".join(tokens[mid:]),
+    ]
+```
+
+**Example:**
+```python
+query = "institutional order flow auction market theory"
+tokens = ["institutional", "order", "flow", "auction", "market", "theory"]
+sub_queries = [
+    "institutional order flow",
+    "auction market theory"
+]
+```
+
+### Constraints
+
+```python:src/athena/tools/agentic_search.py
+MIN_SUBQUERY_TOKENS = 2  # Minimum viable sub-query length
+MAX_SUBQUERIES = 4       # Maximum decomposition depth
+```
+
+## Phase 2: Parallel Retrieval
+
+Each sub-query executes the full hybrid search pipeline:
+
+```python:src/athena/tools/agentic_search.py
+def _run_subquery_search(subquery: str, limit: int = 10) -> Tuple[str, List[Dict]]:
+    from athena.tools.search import (
+        collect_canonical,
+        collect_tags,
+        collect_vectors,
+        collect_graphrag,
+        collect_filenames,
+        collect_sqlite,
+        weighted_rrf,
+    )
+    
+    # Parallel collection within each sub-query
+    with ThreadPoolExecutor(max_workers=6) as executor:
+        futures = {
+            executor.submit(collect_canonical, subquery): "canonical",
+            executor.submit(collect_tags, subquery): "tags",
+            executor.submit(collect_vectors, subquery): "vector",
+            executor.submit(collect_graphrag, subquery): "graphrag",
+            executor.submit(collect_filenames, subquery): "filename",
+            executor.submit(collect_sqlite, subquery): "sqlite",
+        }
+    
+    fused = weighted_rrf(lists)
+    return subquery, fused[:limit]
+```
+
+### Orchestration
+
+```python:src/athena/tools/agentic_search.py
+with ThreadPoolExecutor(max_workers=min(len(sub_queries), 4)) as executor:
+    future_to_sq = {
+        executor.submit(_run_subquery_search, sq, limit): sq 
+        for sq in sub_queries
+    }
+    for future in as_completed(future_to_sq, timeout=30):
+        subquery, results = future.result()
+```
+
+## Phase 3: Validation
+
+Validates each result against the **original query** using cosine similarity:
+
+```python:src/athena/tools/agentic_search.py
+VALIDATION_THRESHOLD = 0.25  # Minimum similarity score
+
+def validate_results(
+    results: List[SearchResult],
+    query_embedding: List[float],
+    threshold: float = VALIDATION_THRESHOLD,
+) -> List[SearchResult]:
+    validated = []
+    for result in results:
+        result_embedding = get_embedding(result.content[:500])
+        sim = cosine_similarity(query_embedding, result_embedding)
+        if sim >= threshold:
+            result.metadata["validation_score"] = round(sim, 4)
+            validated.append(result)
+    return validated
+```
+
+### Cosine Similarity
+
+```python:src/athena/tools/agentic_search.py
+def cosine_similarity(vec_a: List[float], vec_b: List[float]) -> float:
+    dot = sum(a * b for a, b in zip(vec_a, vec_b))
+    norm_a = sum(a * a for a in vec_a) ** 0.5
+    norm_b = sum(b * b for b in vec_b) ** 0.5
+    return dot / (norm_a * norm_b)
+```
+
+## Phase 4: Synthesis
+
+### Deduplication
+
+Results are deduplicated by `doc.id` across all sub-queries:
+
+```python:src/athena/tools/agentic_search.py
+all_results: Dict[str, SearchResult] = {}
+provenance: Dict[str, List[str]] = defaultdict(list)
+
+for subquery, results in subquery_results:
+    for result in results:
+        if result.id not in all_results:
+            all_results[result.id] = result
+        else:
+            # Boost score for multi-source matches
+            existing = all_results[result.id]
+            existing.rrf_score = max(existing.rrf_score, result.rrf_score) * 1.1
+        provenance[result.id].append(subquery)
+```
+
+### Provenance Tracking
+
+Each result tracks which sub-queries found it:
+
+```python:src/athena/tools/agentic_search.py
+for result in final:
+    result.metadata["found_by"] = provenance.get(result.id, [])
+    result.metadata["multi_source"] = len(provenance.get(result.id, [])) > 1
+```
+
+## CLI Usage
+
+### Basic Agentic Search
+
+```bash
+python -m athena.tools.agentic_search "trading risk management and psychology"
+```
+
+**Output:**
+```
+🧠 AGENTIC SEARCH: "trading risk management and psychology"
+============================================================
+   🧩 Decomposed into 3 sub-queries:
+      1. "trading risk management and psychology"
+      2. "trading risk management"
+      3. "psychology"
+   📊 47 unique candidates found → returning top 10
+
+<athena_grounding>
+
+🏆 TOP 10 RESULTS:
+
+  🔗 1. [RRF:0.0521 V:0.87] Protocol 49: Risk Management Framework
+        📁 .agent/skills/protocols/049-risk-management.md
+        🧩 Found by: ['trading risk management and psychology', 'trading risk management']
+```
+
+### With Debug
+
+```bash
+python -m athena.tools.agentic_search "protocol 137 vs protocol 49" --debug
+```
+
+### JSON Output
+
+```bash
+python -m athena.tools.agentic_search "case studies" --json
+```
+
+**Output:**
+```json
+{
+  "results": [
+    {
+      "id": "Case Study: Position Sizing",
+      "content": "Analysis of position sizing strategies...",
+      "rrf_score": 0.0421,
+      "metadata": {
+        "path": ".context/case_studies/cs-002.md",
+        "validation_score": 0.82,
+        "found_by": ["case studies"],
+        "multi_source": false
+      }
+    }
+  ],
+  "sub_queries": ["case studies"],
+  "decomposed": false,
+  "meta": {
+    "total_candidates": 15,
+    "returned": 10,
+    "sub_query_count": 1
+  }
+}
+```
+
+## Performance
+
+### Latency Breakdown
+
+```
+Phase 1 (Decomposition):  ~2ms    (rule-based, no LLM)
+Phase 2 (Retrieval):      ~800ms  (parallel sub-queries)
+Phase 3 (Validation):     ~300ms  (embedding + cosine)
+Phase 4 (Synthesis):      ~5ms    (dedup + merge)
+---------------------------------------------------
+Total:                    ~1.1s   (for 3 sub-queries)
+```
+
+### Comparison
+
+| Approach | Latency | Recall | Precision |
+|----------|---------|--------|----------|
+| Simple Search | 800ms | 0.72 | 0.81 |
+| Agentic Search | 1.1s | 0.89 | 0.85 |
+
+## Use Cases
+
+### Multi-Concept Queries
+
+```
+Query: "risk management and trading psychology"
+Decomposition:
+  1. "risk management and trading psychology"  (original)
+  2. "risk management"
+  3. "trading psychology"
+```
+
+### Comparison Queries
+
+```
+Query: "GraphRAG vs VectorRAG"
+Decomposition:
+  1. "GraphRAG vs VectorRAG"  (original)
+  2. "GraphRAG"
+  3. "VectorRAG"
+```
+
+### Sequential Queries
+
+```
+Query: "find trend continuation patterns and then position sizing rules"
+Decomposition:
+  1. "find trend continuation patterns and then position sizing rules"  (original)
+  2. "find trend continuation patterns"
+  3. "position sizing rules"
+```
+
+## Integration Example
+
+```python
+from athena.tools.agentic_search import agentic_search
+
+# Run agentic search
+result = agentic_search(
+    query="risk management and psychology",
+    limit=10,
+    validate=True,
+    debug=True
+)
+
+# Access results
+for doc in result["results"]:
+    print(f"Title: {doc.id}")
+    print(f"Score: {doc.rrf_score:.4f}")
+    print(f"Validation: {doc.metadata['validation_score']:.2f}")
+    print(f"Found by: {doc.metadata['found_by']}")
+    print(f"Multi-source: {doc.metadata['multi_source']}")
+    print()
+
+# Check decomposition
+if result["decomposed"]:
+    print(f"Query decomposed into {len(result['sub_queries'])} parts:")
+    for sq in result["sub_queries"]:
+        print(f"  - {sq}")
+```
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Hybrid Search" icon="magnifying-glass" href="/sdk/tools/search">
+    Single-query RRF search
+  </Card>
+  <Card title="Search Models" icon="database" href="/sdk/core/models">
+    SearchResult data structure
+  </Card>
+</CardGroup>

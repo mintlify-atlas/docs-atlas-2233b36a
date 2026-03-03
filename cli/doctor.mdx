@@ -1,0 +1,357 @@
+---
+title: "athena doctor"
+description: "Run comprehensive system diagnostics with 15 health checks and auto-repair"
+---
+
+Comprehensive health diagnostics inspired by OpenClaw's doctor command. Runs 15 diagnostic checks across environment, workspace, memory, git, daemon, and database layers.
+
+## Usage
+
+```bash
+athena doctor [OPTIONS]
+```
+
+## Options
+
+<ParamField path="--fix" type="flag">
+  Auto-repair fixable issues (creates missing directories, fixes permissions, removes stale locks)
+</ParamField>
+
+<ParamField path="--json" type="flag">
+  Output results in machine-readable JSON format
+</ParamField>
+
+<ParamField path="--quiet" type="flag" default="false">
+  Show summary only, suppress detailed check output
+</ParamField>
+
+<ParamField path="--root" type="path">
+  Specify project root directory (auto-detected if not provided)
+</ParamField>
+
+## Examples
+
+### Basic Diagnostics
+
+```bash
+athena doctor
+```
+
+**Output:**
+```
+============================================================
+  🩺 ATHENA DOCTOR — System Diagnostics
+============================================================
+   Root: /Users/winston/athena-workspace
+
+   ┌─ Environment
+   ✅ Python: 3.11.5
+   ✅ Virtual Env: Active
+   ✅ Dep: dotenv: Installed
+   ✅ Dep: supabase: Installed
+   ✅ Dep: yaml: Installed
+
+   ┌─ Workspace Marker
+   ✅ Workspace Marker: .athena_root found
+
+   ┌─ Directory Structure
+   ✅ Dir: .agent: Found
+   ✅ Dir: .agent/scripts: Found
+   ✅ Dir: .agent/workflows: Found
+   ✅ Dir: .context: Found
+   ✅ Dir: .context/memory_bank: Found
+   ✅ Dir: .context/memories/session_logs: Found
+
+   ┌─ Config Integrity
+   ✅ Config: .env: Found
+   ✅ Config: .env perms: Mode 600
+   ✅ Env: SUPABASE_URL: Set
+   ✅ Env: SUPABASE_ANON_KEY: Set
+
+   ┌─ Memory Bank
+   ✅ Pillar: activeContext.md: 2,847 bytes
+   ✅ Pillar: userContext.md: 1,293 bytes
+   ✅ Pillar: productContext.md: 3,102 bytes
+   ✅ Pillar: systemPatterns.md: 4,551 bytes
+
+   ┌─ Session Integrity
+   ✅ Session Files: 12 total
+   ✅ Latest Session: 2026-03-03-session-12.md (8,429 bytes)
+
+   ┌─ Orphan Detection
+   ✅ Orphan Scan: No orphans detected
+
+   ┌─ Dead Links
+   ✅ Dead Links: 8 links checked, all valid
+
+   ┌─ Secret Scan
+   ✅ Secret Scan: 3 staged files clean
+
+   ┌─ Git Health
+   ✅ Git Repo: Initialized
+   ✅ Git Lock: No stale locks
+   ✅ Git Remote: origin configured
+   ✅ Git Status: Clean working tree
+
+   ┌─ Daemon Status
+   ⚠️  Daemon: athenad not running
+      python3 Athena-Public/src/athena/core/athenad.py &
+
+   ┌─ Database
+   ✅ Database: Supabase connected
+
+   ┌─ Echo Chamber
+   ✅ Echo Chamber: 7 disagreements in 10 sessions — healthy
+
+   ┌─ Context Freshness
+   ✅ Context Freshness: Updated 0d 3h ago
+
+   ┌─ Workspace Tips
+   ✅ Backup: Workspace under git
+   ✅ Memory System: Memory bank configured
+
+------------------------------------------------------------
+   ✅ 38 passed │ ⚠️  1 warnings │ ⏭️  0 skipped
+   Completed in 2.3s
+
+   System healthy. 🟢
+------------------------------------------------------------
+```
+
+### Auto-Fix Issues
+
+```bash
+athena doctor --fix
+```
+
+Automatically repairs:
+- Creates missing directories
+- Fixes `.env` file permissions to 600
+- Removes stale `.git/index.lock` files
+- Creates `.athena_root` marker if missing
+
+### JSON Output
+
+```bash
+athena doctor --json
+```
+
+```json
+{
+  "root": "/Users/winston/athena-workspace",
+  "timestamp": "2026-03-03T14:23:45.123456",
+  "elapsed_seconds": 2.34,
+  "summary": {
+    "pass": 38,
+    "warn": 1,
+    "fail": 0,
+    "skip": 0
+  },
+  "checks": [
+    {
+      "name": "Python",
+      "status": "pass",
+      "message": "3.11.5"
+    },
+    {
+      "name": "Virtual Env",
+      "status": "pass",
+      "message": "Active"
+    }
+    // ... additional checks
+  ]
+}
+```
+
+### Quiet Mode
+
+```bash
+athena doctor --quiet
+```
+
+Shows only the summary line:
+```
+✅ 38 passed │ ⚠️  1 warnings │ ❌ 0 failed │ ⏭️  0 skipped
+```
+
+## Diagnostic Checks
+
+The doctor command runs 15 comprehensive checks:
+
+### 0. Environment
+- Python version (recommends 3.10+)
+- Virtual environment status
+- Key dependencies (dotenv, supabase, yaml)
+
+### 1. Workspace Marker
+- Validates `.athena_root` exists
+- Auto-creates if `--fix` is enabled
+
+### 2. Directory Structure
+- Checks required directories:
+  - `.agent/` and subdirectories
+  - `.context/memory_bank/`
+  - `.context/memories/session_logs/`
+- Creates missing directories with `--fix`
+
+### 3. Config Integrity
+- Validates `.env` file exists
+- Checks file permissions (should be 600)
+- Verifies key environment variables
+- Fixes permissions with `--fix`
+
+### 4. Memory Bank
+- Validates 4 pillar files:
+  - `activeContext.md` - Current session state
+  - `userContext.md` - User profile
+  - `productContext.md` - Product philosophy
+  - `systemPatterns.md` - Architecture patterns
+- Reports file sizes
+- Warns if files are nearly empty (less than 50 bytes)
+
+### 5. Session Integrity
+- Counts total session log files
+- Validates most recent session
+- Warns if latest session is suspiciously small
+- Detects 1-line stubs
+
+### 6. Orphan Detection
+- Runs `orphan_detector.py` if available
+- Scans for orphaned files/directories
+- Non-critical (skips if detector missing)
+
+### 7. Dead Links
+- Scans `activeContext.md` for `file://` links
+- Validates all linked files exist
+- Reports broken links with paths
+
+### 8. Secret Scan
+- Scans git staged files for potential secrets:
+  - AWS Access Keys
+  - GitHub Personal Access Tokens
+  - OpenAI/Anthropic API Keys
+  - JWT/Supabase tokens
+  - Google API Keys
+  - Private keys
+- **Fails** if secrets detected in staged files
+
+### 9. Git Health
+- Validates git repository exists
+- Checks for stale `.git/index.lock` files
+- Verifies remote origin is configured
+- Reports dirty working tree status
+- Removes stale locks with `--fix`
+
+### 10. Daemon Status
+- Checks if `athenad.py` process is running
+- Reports PID if active
+- Provides command to start daemon
+
+### 11. Database
+- Tests Supabase connectivity (if configured)
+- Skips if environment variables not set
+- Non-critical for offline operation
+
+### 12. Echo Chamber
+- Scans recent sessions for disagreement signals:
+  - "actually", "incorrect", "disagree"
+  - "not quite", "push back", "not accurate"
+- Warns if less than 3 disagreements in last 10 sessions
+- Promotes healthy agent-user dialogue
+
+### 13. Context Freshness
+- Checks `activeContext.md` modification time
+- Warns if >7 days old
+- Suggests updating at next `/start`
+
+### 14. Workspace Tips
+- Recommends git backup if not initialized
+- Validates memory bank is configured
+- Provides setup guidance
+
+## Status Indicators
+
+| Icon | Status | Meaning |
+|:-----|:-------|:--------|
+| ✅ | Pass | Check passed successfully |
+| ⚠️ | Warn | Warning detected, non-critical |
+| ❌ | Fail | Critical issue found |
+| ⏭️ | Skip | Check skipped (dependency missing) |
+
+## Exit Codes
+
+| Code | Meaning |
+|:-----|:--------|
+| `0` | All checks passed (warnings are acceptable) |
+| `1` | One or more checks failed (critical issues) |
+
+## Auto-Fix Capabilities
+
+The `--fix` flag automatically resolves:
+
+- Missing `.athena_root` marker
+- Missing directory structure
+- Incorrect `.env` file permissions
+- Stale `.git/index.lock` files
+
+<Warning>
+  Auto-fix will **not** resolve issues requiring manual intervention:
+  - Missing environment variables
+  - Secrets in staged files
+  - Stale context files
+  - Broken file:// links
+</Warning>
+
+## Common Workflows
+
+### Fresh Workspace Validation
+
+```bash
+# After init, verify everything is set up
+athena init .
+athena doctor
+```
+
+### Pre-Commit Check
+
+```bash
+# Before committing, check for secrets
+athena doctor
+```
+
+### Automated CI/CD
+
+```bash
+# In CI pipeline, use JSON output
+athena doctor --json > diagnostics.json
+```
+
+### Repair Workspace
+
+```bash
+# After git pull, fix any structural issues
+git pull
+athena doctor --fix
+```
+
+## Integration with Scripts
+
+Parse JSON output in shell scripts:
+
+```bash
+#!/bin/bash
+if athena doctor --json | jq -e '.summary.fail > 0' > /dev/null; then
+  echo "❌ Critical issues detected"
+  exit 1
+fi
+echo "✅ Workspace healthy"
+```
+
+## Pattern Credit
+
+This diagnostic system is inspired by [OpenClaw's doctor command](https://github.com/openclaw/openclaw/blob/main/docs/doctor.md), implementing comprehensive health checks for AI agent workspaces.
+
+## Related Commands
+
+- [athena check](/cli/check) - Quick basic health check
+- [athena init](/cli/init) - Initialize workspace structure

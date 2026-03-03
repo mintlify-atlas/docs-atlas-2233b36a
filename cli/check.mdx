@@ -1,0 +1,159 @@
+---
+title: "athena check"
+description: "Run basic health diagnostics on your Athena workspace"
+---
+
+Quick health check to verify your Athena workspace is properly configured. Runs essential diagnostics including workspace marker detection, directory structure, and environment variables.
+
+## Usage
+
+```bash
+athena check
+```
+
+## What It Checks
+
+The basic health check verifies:
+
+1. **CLI Version** - Confirms athena-cli is installed
+2. **Workspace Marker** - Checks for `.athena_root` file
+3. **Key Directories** - Validates `.agent/`, `.context/`, `.framework/` exist
+4. **Environment Variables** - Reports on optional cloud features
+
+## Example Output
+
+```bash
+$ athena check
+```
+
+```
+🩺 ATHENA SYSTEM CHECK
+============================================================
+   CLI Version: 1.0.0
+   ✅ Workspace marker: Found
+   ✅ .agent/: Found
+   ✅ .context/: Found
+   ✅ .framework/: Found
+
+🔑 Environment Variables:
+   ✅ SUPABASE_URL: Set
+   ✅ SUPABASE_ANON_KEY: Set
+   ⚠️  ANTHROPIC_API_KEY: Not set (optional for cloud features)
+
+============================================================
+📚 Docs: https://github.com/winstonkoh87/Athena-Public
+```
+
+## Interpreting Results
+
+### Success Indicators (✅)
+
+- **Workspace marker: Found** - `.athena_root` exists, workspace is initialized
+- **Directory: Found** - Required directory exists
+- **Environment variable: Set** - Cloud feature is configured
+
+### Warnings (⚠️)
+
+- **Workspace marker: Missing** - Run `athena init .` to initialize workspace
+- **Directory: Missing** - Critical directory not found, run `athena init .` or create manually
+- **Environment variable: Not set** - Optional cloud feature unavailable (workspace still functional)
+
+### Failures (❌)
+
+- **Directory: Missing** - Core directory structure is incomplete
+
+## Common Issues
+
+### Workspace Not Initialized
+
+**Symptom:**
+```
+⚠️  Workspace marker: Missing (run `athena init .` first)
+❌ .agent/: Missing
+❌ .context/: Missing
+❌ .framework/: Missing
+```
+
+**Solution:**
+```bash
+athena init .
+```
+
+### Missing Environment Variables
+
+**Symptom:**
+```
+⚠️  SUPABASE_URL: Not set (optional for cloud features)
+⚠️  SUPABASE_ANON_KEY: Not set (optional for cloud features)
+```
+
+**Solution:**
+
+Create a `.env` file in your workspace root:
+
+```bash .env
+SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_ANON_KEY=your-anon-key
+ANTHROPIC_API_KEY=sk-ant-...
+```
+
+<Info>
+  Environment variables are **optional**. Athena works fully offline without them. They only enable cloud sync features.
+</Info>
+
+### Running in Wrong Directory
+
+**Symptom:**
+```
+⚠️  Workspace marker: Missing
+```
+
+**Solution:**
+
+Navigate to your Athena workspace root:
+
+```bash
+cd /path/to/your/workspace
+athena check
+```
+
+## When to Use
+
+Use `athena check` when you:
+
+- Just initialized a workspace and want to verify setup
+- Cloned a workspace from git and need to check configuration
+- Experience issues and want to rule out basic setup problems
+- Haven't used Athena in a while and want to confirm everything's ready
+
+## vs athena doctor
+
+`athena check` is a lightweight alternative to [`athena doctor`](/cli/doctor):
+
+| Feature | `check` | `doctor` |
+|:--------|:--------|:---------|
+| Checks run | 4 basic | 15 comprehensive |
+| Execution time | Less than 1 second | 2-5 seconds |
+| Reports | Essential only | Detailed diagnostics |
+| Auto-fix | No | Yes (with `--fix`) |
+| JSON output | No | Yes (with `--json`) |
+| Best for | Quick verification | Deep troubleshooting |
+
+<Tip>
+  For comprehensive diagnostics including git health, memory bank validation, and secret scanning, use [`athena doctor`](/cli/doctor).
+</Tip>
+
+## Exit Codes
+
+| Code | Meaning |
+|:-----|:--------|
+| `0` | Check completed (warnings don't affect exit code) |
+
+<Note>
+  Unlike `athena doctor`, the basic check always exits with code `0`. It's informational only.
+</Note>
+
+## Related Commands
+
+- [athena init](/cli/init) - Initialize workspace structure
+- [athena doctor](/cli/doctor) - Run comprehensive diagnostics with auto-fix

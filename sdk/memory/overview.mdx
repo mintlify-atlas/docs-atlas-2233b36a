@@ -1,0 +1,174 @@
+---
+title: "Memory System Overview"
+description: "Learn about Athena's memory architecture including vector storage, session management, and intelligent caching."
+---
+
+## Introduction
+
+Athena's memory subsystem provides persistent context, semantic search, and session tracking capabilities. The memory system consists of three core components:
+
+- **Vector Database Integration** - Supabase pgvector for semantic search
+- **Session Management** - Lifecycle tracking and checkpointing
+- **Delta Manifest** - High-performance change detection
+
+## Architecture
+
+The memory system is located in `src/athena/memory/` and consists of:
+
+<CodeGroup>
+```python Module Structure
+athena.memory/
+├── __init__.py          # Package exports
+├── vectors.py           # Vector DB & embeddings
+├── sync.py              # Workspace sync logic
+├── delta_manifest.py    # Change tracking
+└── sessions.py          # Session lifecycle
+```
+</CodeGroup>
+
+## Core Components
+
+### Vector Database (`vectors.py`)
+
+Thread-safe embedding generation and semantic search powered by:
+- **Gemini Embedding Model** (`gemini-embedding-001`) - 3072 dimensions
+- **Persistent Caching** - JSON-backed disk cache with atomic writes
+- **Thread-Local Clients** - Prevents httpx connection state corruption
+
+See [Vector Database](/sdk/memory/vector-db) for detailed API reference.
+
+### Session Management (`sessions.py`)
+
+Unified session lifecycle with:
+- Automatic session numbering
+- YAML frontmatter metadata
+- Checkpoint appending
+- Lambda (Λ) cognitive load tracking
+- Forward/backward lineage linking
+
+See [Sessions](/sdk/memory/sessions) for usage examples.
+
+### Delta Manifest (`delta_manifest.py`)
+
+High-performance change detection engine:
+- **O(1) Quick-Check** - Size/mtime comparison before hashing
+- **Thread-Safe** - Atomic writes with locks
+- **Path Stable** - Relative paths to PROJECT_ROOT
+
+## Synchronized Collections
+
+The memory system syncs these workspace collections to Supabase:
+
+| Collection | Table | Primary Key |
+|:-----------|:------|:------------|
+| Session Logs | `sessions` | `file_path` |
+| Protocols | `protocols` | `code` |
+| Case Studies | `case_studies` | `code` |
+| Workflows | `workflows` | `file_path` |
+| System Docs | `system_docs` | `file_path` |
+| Capabilities | `capabilities` | `file_path` |
+| Frameworks | `frameworks` | `file_path` |
+| Insights | `insights` | `file_path` |
+
+## Quick Start
+
+<CodeGroup>
+```python Generate Embeddings
+from athena.memory.vectors import get_embedding
+
+# Generate embedding for text
+text = "How do I implement semantic search?"
+embedding = get_embedding(text)  # Returns List[float]
+print(f"Dimensions: {len(embedding)}")  # 3072
+```
+
+```python Semantic Search
+from athena.memory.vectors import get_client, search_protocols
+
+client = get_client()
+query_embedding = get_embedding("multi-agent coordination")
+
+results = search_protocols(
+    client,
+    query_embedding,
+    limit=5,
+    threshold=0.3
+)
+
+for result in results:
+    print(f"{result['code']}: {result['title']}")
+```
+
+```python Sync Files
+from pathlib import Path
+from athena.memory.sync import sync_file_to_supabase
+from athena.memory.delta_manifest import DeltaManifest
+
+manifest = DeltaManifest()
+file_path = Path(".agent/workflows/start.md")
+
+success = sync_file_to_supabase(
+    file_path,
+    table_name="workflows",
+    manifest=manifest
+)
+
+if success:
+    manifest.save()
+```
+</CodeGroup>
+
+## Environment Setup
+
+Required environment variables:
+
+```bash .env
+# Supabase (Vector DB)
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=your-service-role-key
+
+# Google AI (Embeddings)
+GOOGLE_API_KEY=your-gemini-api-key
+```
+
+## Performance Features
+
+### Thread Safety
+
+All memory components are thread-safe:
+- **Thread-Local Supabase Clients** - Prevents connection state corruption in parallel loops
+- **Atomic Cache Operations** - `PersistentEmbeddingCache` uses locks and atomic writes
+- **Background Saves** - Non-blocking disk operations
+
+Reference: `vectors.py:31-48`
+
+### Caching Strategy
+
+Embedding cache reduces API calls:
+- **Location**: `.athena/state/embedding_cache.json`
+- **Key**: MD5 hash of input text
+- **Atomic Writes**: Temp file + `os.replace()`
+- **Background Saves**: Daemon threads offload I/O
+
+Reference: `vectors.py:51-113`
+
+### Change Detection
+
+Delta manifest uses 3-tier detection:
+
+1. **New File Check** - O(1) dict lookup
+2. **Quick Check** - O(1) size/mtime comparison  
+3. **Deep Check** - O(N) SHA-256 hash
+
+Reference: `delta_manifest.py:92-120`
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Vector Database" icon="database" href="/sdk/memory/vector-db">
+    Deep dive into embeddings and semantic search APIs
+  </Card>
+  <Card title="Sessions" icon="clock-rotate-left" href="/sdk/memory/sessions">
+    Learn session lifecycle management and checkpointing
+  </Card>
+</CardGroup>

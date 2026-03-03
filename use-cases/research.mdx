@@ -1,0 +1,383 @@
+---
+title: Research & Synthesis
+description: Compile hundreds of sources into coherent frameworks, maintain citation tracking, and build searchable knowledge bases that persist across months.
+---
+
+Athena transforms research workflows by treating knowledge as **persistent, searchable, and compounding** — not disposable chat history that vanishes when you close the tab.
+
+## The Research Problem
+
+<CardGroup cols={2}>
+  <Card title="Lost Context" icon="cloud-slash">
+    You spent 3 hours researching a topic with ChatGPT. Next week, you can't find that conversation.
+  </Card>
+  
+  <Card title="No Citations" icon="link-slash">
+    Platform memory recalls vague ideas but loses source URLs, paper titles, and exact quotes.
+  </Card>
+  
+  <Card title="Single-Session Limits" icon="clock">
+    Each research session starts from zero. No compounding across multiple deep dives.
+  </Card>
+  
+  <Card title="Can't Cross-Reference" icon="diagram-project">
+    Finding connections between Research Session A (2 months ago) and Research Session B (yesterday) requires manual re-reading.
+  </Card>
+</CardGroup>
+
+## How Athena Solves This
+
+### Persistent Research Sessions
+
+<Steps>
+  <Step title="Initial Research (Session 1)">
+    ```text
+    You: "Research the effectiveness of spaced repetition
+          for language learning."
+    
+    AI: [Searches, synthesizes 20 sources]
+        Filed under: cognitive-science/spaced-repetition.md
+        Tagged: #learning #memory #retention
+    ```
+  </Step>
+  
+  <Step title="Deep Dive (Session 5)">
+    ```text
+    You: "Dig deeper into the neuroscience of why
+          spaced repetition works."
+    
+    AI: [Loads previous research from Session 1]
+        [Adds 15 neuroscience papers]
+        Updated: cognitive-science/spaced-repetition.md
+        New file: cognitive-science/memory-consolidation.md
+    ```
+  </Step>
+  
+  <Step title="Synthesis (Session 10)">
+    ```text
+    You: "Compile everything into a framework I can use
+          to design a learning curriculum."
+    
+    AI: [Synthesizes 35 sources across 10 sessions]
+        Created: frameworks/learning-curriculum-design.md
+        Includes: Citations, core principles, implementation steps
+    ```
+  </Step>
+  
+  <Step title="Recall (6 Months Later)">
+    ```text
+    You: "What did we learn about spaced repetition?"
+    
+    AI: [Retrieves all 3 research files + session context]
+        "Here's the framework from Session 10, with links
+         to the neuroscience evidence from Session 5..."
+    ```
+  </Step>
+</Steps>
+
+<Note>
+**The research persists.** 6 months later, it's still searchable, citable, and linkable.
+</Note>
+
+## Research Workflows
+
+### Literature Review
+
+<Accordion title="Multi-Source Compilation">
+  **Typical workflow:**
+  
+  ```text
+  You: "Compile recent research on transformer architectures
+        in natural language processing. Focus on papers from
+        2024-2026."
+  
+  AI: [Searches, extracts key findings from 50+ papers]
+      
+      Filed structure:
+      - research/nlp/transformers-overview.md
+      - research/nlp/attention-mechanisms.md
+      - research/nlp/efficiency-improvements.md
+      
+      Each file includes:
+      - Core findings
+      - Source citations (authors, year, DOI)
+      - Your annotations
+      - Cross-references to related research
+  ```
+  
+  **After 20 sessions:** You have a fully navigable knowledge graph of transformer research.
+</Accordion>
+
+<Accordion title="Citation Management">
+  **Automatic citation tracking:**
+  
+  ```markdown Example Research File
+  # Attention Mechanisms in Transformers
+  
+  ## Core Finding
+  Multi-head attention allows parallel processing of different
+  representation subspaces (Vaswani et al., 2017).
+  
+  ## Sources
+  - Vaswani, A., et al. (2017). "Attention Is All You Need"
+    https://arxiv.org/abs/1706.03762
+  - Dosovitskiy, A., et al. (2020). "An Image is Worth 16x16 Words"
+    https://arxiv.org/abs/2010.11929
+  
+  ## Related Research
+  - See: research/nlp/efficiency-improvements.md (Flash Attention)
+  ```
+  
+  **6 months later:** Search for "Vaswani attention" and the AI finds all references across your entire research archive.
+</Accordion>
+
+### Topic Deep Dives
+
+<CodeGroup>
+```text Session 1: Surface-Level Research
+You: "Explain how RAG (Retrieval-Augmented Generation) works."
+
+AI: [Provides overview, files basic explainer]
+    Filed: ai/rag-basics.md
+```
+
+```text Session 10: Implementation Details
+You: "What are the tradeoffs between different vector databases
+      for RAG applications?"
+
+AI: [Loads RAG context from Session 1]
+    [Compares Pinecone, Weaviate, ChromaDB, pgvector]
+    Filed: ai/rag-vector-databases.md
+```
+
+```text Session 25: Production Lessons
+You: "What did we learn from deploying our RAG system?"
+
+AI: [Cross-references Sessions 1-24]
+    "ChromaDB for prototyping (Session 10),
+     pgvector for production (Session 18),
+     Flash Rank for reranking (Session 22)."
+```
+</CodeGroup>
+
+<Tip>
+**Each session builds on the last.** By Session 25, you have a comprehensive knowledge base on RAG — not scattered across 25 forgotten chats.
+</Tip>
+
+### Comparative Analysis
+
+<CardGroup cols={2}>
+  <Card title="Framework Comparison" icon="scale-unbalanced">
+    **Task:** Compare React, Vue, and Svelte
+    
+    **Athena approach:**
+    - Session 1-5: Research each framework
+    - Session 10: Compile comparison matrix
+    - Result: `frameworks/frontend-comparison.md` with citations, performance data, use case recommendations
+  </Card>
+  
+  <Card title="Historical Analysis" icon="timeline">
+    **Task:** Evolution of web standards
+    
+    **Athena approach:**
+    - Sessions 1-20: Research HTML5, ES6, CSS3, WebAssembly
+    - Session 25: Timeline synthesis
+    - Result: Searchable historical context for architecture decisions
+  </Card>
+</CardGroup>
+
+## Knowledge Base Building
+
+### Personal Wiki Creation
+
+<Steps>
+  <Step title="Organic Growth (Sessions 1-50)">
+    Don't plan a structure upfront. Just research topics as they interest you:
+    
+    - "How does DNS work?"
+    - "What's the CAP theorem?"
+    - "Explain Byzantine fault tolerance"
+    
+    The AI files each research session automatically.
+  </Step>
+  
+  <Step title="Pattern Emergence (Sessions 50-100)">
+    After 50+ sessions, patterns emerge:
+    
+    ```text
+    research/
+      distributed-systems/
+        cap-theorem.md
+        byzantine-fault-tolerance.md
+        consensus-algorithms.md
+      networking/
+        dns.md
+        tcp-ip.md
+        load-balancing.md
+    ```
+    
+    The AI organized it based on topic relationships.
+  </Step>
+  
+  <Step title="Cross-Linking (Sessions 100+)">
+    The AI starts connecting ideas:
+    
+    ```text
+    AI: "This load balancing strategy is related to the
+         consensus algorithms we researched in Session 45.
+         Want me to add cross-references?"
+    ```
+  </Step>
+</Steps>
+
+### Academic Research
+
+<Accordion title="Thesis/Dissertation Support">
+  **Multi-month research workflow:**
+  
+  ```text
+  Month 1 (Sessions 1-30):
+  - Literature review across 200+ papers
+  - Automatic citation extraction
+  - Topic clustering
+  
+  Month 2 (Sessions 31-60):
+  - Deep dives into core topics
+  - Comparative analysis
+  - Framework synthesis
+  
+  Month 3 (Sessions 61-90):
+  - Writing support (loads relevant research on demand)
+  - Citation formatting
+  - Gap analysis ("What haven't we covered?")
+  ```
+  
+  **Result:** 6,000-word literature review with 200+ citations, fully searchable and traceable to original sources.
+</Accordion>
+
+<Accordion title="Industry Research">
+  **Market analysis workflow:**
+  
+  ```text
+  You: "Research the AI coding assistant market.
+        Competitors, pricing, features, market size."
+  
+  AI: [Compiles data from 50+ sources]
+      Filed:
+      - market-research/ai-coding-assistants/overview.md
+      - market-research/ai-coding-assistants/competitors.md
+      - market-research/ai-coding-assistants/pricing-analysis.md
+      
+      Updated: Every 2 weeks as new data emerges
+  ```
+  
+  **3 months later:** "Show me how the market has evolved" → AI compares snapshots across time.
+</Accordion>
+
+## Advanced Research Features
+
+### Semantic Search Across Research
+
+<CodeGroup>
+```bash Basic Search
+/search transformer attention mechanisms
+```
+
+```bash Cross-Topic Search  
+/search "papers citing Vaswani" AND "efficiency improvements"
+```
+
+```bash Temporal Search
+/search "what we learned about RAG between Session 10 and 20"
+```
+</CodeGroup>
+
+<Info>
+**Semantic search finds connections** even if you don't remember exact terms. "The paper about parallel attention" finds Vaswani et al. 2017.
+</Info>
+
+### Source Tracking
+
+<CardGroup cols={2}>
+  <Card title="URL Preservation" icon="link">
+    Every source URL is preserved. 6 months later: "Find that paper on flash attention" → Direct link to the PDF.
+  </Card>
+  
+  <Card title="Author Tracking" icon="user">
+    "What else did we read by Dosovitskiy?" → AI lists all papers by that author across your research.
+  </Card>
+  
+  <Card title="Citation Graphs" icon="diagram-project">
+    "Which of our research files cite the CAP theorem?" → AI shows all cross-references.
+  </Card>
+  
+  <Card title="Version History" icon="clock-rotate-left">
+    "What did we think about transformers in Session 1 vs Session 50?" → Compare evolution of understanding.
+  </Card>
+</CardGroup>
+
+## Practical Tips
+
+<Warning>
+**Don't Force Structure**
+
+Let the knowledge base grow organically. Trying to plan a taxonomy upfront creates friction. File names and organization will emerge naturally.
+</Warning>
+
+<Tip>
+**Use Tags Liberally**
+
+Add tags in natural language: "This is about #machine-learning and #optimization."
+
+The AI indexes them automatically for future retrieval.
+</Tip>
+
+<Tip>
+**Revisit Old Research**
+
+Every 20-30 sessions, ask: "What did we research 2 months ago that's relevant to [current topic]?"
+
+The AI finds surprising connections.
+</Tip>
+
+## Key Outcomes
+
+<CardGroup cols={2}>
+  <Card title="200+ Sources → 1 Framework" icon="compress">
+    Compile months of research into actionable frameworks with full citations.
+  </Card>
+  
+  <Card title="6-Month Recall" icon="clock">
+    "That paper about attention mechanisms from January" → Found instantly.
+  </Card>
+  
+  <Card title="Cross-Domain Insights" icon="lightbulb">
+    AI connects distributed systems research to front-end architecture patterns.
+  </Card>
+  
+  <Card title="Living Documentation" icon="book-open">
+    Research files update as you learn more — not static notes.
+  </Card>
+</CardGroup>
+
+## Comparison: Athena vs Traditional Tools
+
+| Capability | ChatGPT/Claude | Notion/Obsidian | Athena |
+|:-----------|:---------------|:----------------|:-------|
+| **Session persistence** | ❌ Resets each chat | ✅ Manual organization | ✅ Automatic compounding |
+| **Citation tracking** | ❌ Lost in history | ⚠️ Manual entry | ✅ Auto-extracted |
+| **Semantic search** | ❌ Keyword only | ⚠️ Basic search | ✅ Full semantic + keyword |
+| **Cross-references** | ❌ None | ⚠️ Manual linking | ✅ AI-suggested |
+| **Temporal analysis** | ❌ No history | ❌ Static snapshots | ✅ Evolution tracking |
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Decision-Making" icon="scale-balanced" href="/use-cases/decision-making">
+    Use research insights for strategic decisions
+  </Card>
+  
+  <Card title="Getting Started" icon="rocket" href="/getting-started">
+    Set up Athena and start your first research session
+  </Card>
+</CardGroup>

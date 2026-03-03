@@ -1,122 +1,160 @@
 {
   "$schema": "https://mintlify.com/docs.json",
-  "theme": "mint",
-  "name": "Mint Starter Kit",
+  "name": "Athena",
+  "theme": "aspen",
   "colors": {
-    "primary": "#16A34A",
-    "light": "#07C983",
-    "dark": "#15803D"
+    "primary": "#10b981",
+    "light": "#22c55e",
+    "dark": "#16a34a"
   },
-  "favicon": "/favicon.svg",
+  "navbar": {
+    "primary": {
+      "type": "github",
+      "href": "https://github.com/winstonkoh87/Athena-Public"
+    }
+  },
+  "footer": {
+    "socials": {
+      "github": "https://github.com/winstonkoh87/Athena-Public"
+    }
+  },
   "navigation": {
     "tabs": [
       {
-        "tab": "Guides",
+        "tab": "Documentation",
         "groups": [
           {
-            "group": "Getting started",
+            "group": "Getting Started",
             "pages": [
               "index",
               "quickstart",
-              "development"
+              "installation",
+              "your-first-session"
             ]
           },
           {
-            "group": "Customization",
+            "group": "Core Concepts",
             "pages": [
-              "essentials/settings",
-              "essentials/navigation"
+              "core-concepts/architecture",
+              "core-concepts/memory-system",
+              "core-concepts/workflows",
+              "core-concepts/protocols",
+              "core-concepts/agent-compatibility"
             ]
           },
           {
-            "group": "Writing content",
+            "group": "Guides",
             "pages": [
-              "essentials/markdown",
-              "essentials/code",
-              "essentials/images",
-              "essentials/reusable-snippets"
+              "guides/creating-workflows",
+              "guides/writing-protocols",
+              "guides/semantic-search",
+              "guides/multi-model-strategy",
+              "guides/importing-data",
+              "guides/best-practices"
             ]
           },
           {
-            "group": "AI tools",
+            "group": "Use Cases",
             "pages": [
-              "ai-tools/cursor",
-              "ai-tools/claude-code",
-              "ai-tools/windsurf"
+              "use-cases/overview",
+              "use-cases/life-management",
+              "use-cases/work-projects",
+              "use-cases/research",
+              "use-cases/decision-making"
+            ]
+          },
+          {
+            "group": "Advanced",
+            "pages": [
+              "advanced/mcp-server",
+              "advanced/vector-rag",
+              "advanced/governance",
+              "advanced/security",
+              "advanced/exocortex-model"
             ]
           }
         ]
       },
       {
-        "tab": "API reference",
+        "tab": "CLI Reference",
         "groups": [
           {
-            "group": "API documentation",
+            "group": "Commands",
             "pages": [
-              "api-reference/introduction"
+              "cli/overview",
+              "cli/init",
+              "cli/check",
+              "cli/doctor",
+              "cli/save"
             ]
           },
           {
-            "group": "Endpoint examples",
+            "group": "Workflows",
             "pages": [
-              "api-reference/endpoint/get",
-              "api-reference/endpoint/create",
-              "api-reference/endpoint/delete",
-              "api-reference/endpoint/webhook"
+              "workflows/start",
+              "workflows/end",
+              "workflows/think",
+              "workflows/research",
+              "workflows/save",
+              "workflows/all-workflows"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "SDK Reference",
+        "groups": [
+          {
+            "group": "Core",
+            "pages": [
+              "sdk/core/overview",
+              "sdk/core/boot",
+              "sdk/core/config",
+              "sdk/core/permissions"
+            ]
+          },
+          {
+            "group": "Memory",
+            "pages": [
+              "sdk/memory/overview",
+              "sdk/memory/vector-db",
+              "sdk/memory/sessions"
+            ]
+          },
+          {
+            "group": "Tools",
+            "pages": [
+              "sdk/tools/overview",
+              "sdk/tools/search",
+              "sdk/tools/agentic-search",
+              "sdk/tools/heartbeat"
+            ]
+          }
+        ]
+      },
+      {
+        "tab": "Resources",
+        "groups": [
+          {
+            "group": "Help",
+            "pages": [
+              "resources/faq",
+              "resources/troubleshooting",
+              "resources/glossary",
+              "resources/case-studies"
+            ]
+          },
+          {
+            "group": "About",
+            "pages": [
+              "resources/manifesto",
+              "resources/benchmarks",
+              "resources/changelog",
+              "resources/contributing"
             ]
           }
         ]
       }
-    ],
-    "global": {
-      "anchors": [
-        {
-          "anchor": "Documentation",
-          "href": "https://mintlify.com/docs",
-          "icon": "book-open-cover"
-        },
-        {
-          "anchor": "Blog",
-          "href": "https://mintlify.com/blog",
-          "icon": "newspaper"
-        }
-      ]
-    }
-  },
-  "logo": {
-    "light": "/logo/light.svg",
-    "dark": "/logo/dark.svg"
-  },
-  "navbar": {
-    "links": [
-      {
-        "label": "Support",
-        "href": "mailto:hi@mintlify.com"
-      }
-    ],
-    "primary": {
-      "type": "button",
-      "label": "Dashboard",
-      "href": "https://dashboard.mintlify.com"
-    }
-  },
-  "contextual": {
-    "options": [
-     "copy",
-     "view",
-     "chatgpt",
-     "claude",
-     "perplexity",
-     "mcp",
-     "cursor",
-     "vscode"
-   ]
-  },
-  "footer": {
-    "socials": {
-      "x": "https://x.com/mintlify",
-      "github": "https://github.com/mintlify",
-      "linkedin": "https://linkedin.com/company/mintlify"
-    }
+    ]
   }
 }

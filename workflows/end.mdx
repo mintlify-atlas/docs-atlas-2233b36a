@@ -1,0 +1,85 @@
+---
+title: "/end - Close Session"
+description: "Close your Athena session, synthesize insights, and commit learnings to long-term memory"
+---
+
+# /end — Close Session
+
+The `/end` workflow properly closes an Athena session by reviewing what happened, synthesizing key insights, and committing them to long-term memory.
+
+## When to Use
+
+- End of every session
+- Before closing your work for the day
+- When you want to preserve context for future sessions
+- After completing a major task or decision
+
+## Behavior
+
+The workflow executes four phases to ensure no insights are lost:
+
+### Phase 1: Review Session
+
+- Reads all checkpoints from the current session log
+- Identifies key decisions and insights made during the session
+
+### Phase 2: Synthesize
+
+Fills in structured sections of the session log:
+- **Key Topics** - What was discussed or worked on
+- **Decisions Made** - Important choices and their rationale
+- **Action Items** - Next steps or follow-ups
+
+### Phase 3: Commit
+
+- Adds the session log to git
+- Creates a commit with format: "Session XX: BRIEF_SUMMARY"
+- Preserves the session for future reference
+
+### Phase 4: Confirm
+
+Outputs: "✅ Session XX closed and committed."
+
+## Usage Example
+
+```
+User: /end
+
+Athena: [Reviews session...]
+
+✅ Session 42 closed and committed.
+
+Key Topics:
+- Evaluated trading strategy for Q1
+- Researched MAS regulations
+
+Decisions Made:
+- Defer options strategy until after regulatory review
+- Proceed with backtesting on historical data
+
+Action Items:
+- Schedule call with compliance advisor
+- Run 2-year backtest by Friday
+```
+
+## Best Practices
+
+1. **Always `/end` properly** - Don't just close the window. Proper session closure commits insights to long-term memory.
+2. **Review the synthesis** - Check that key decisions are accurately captured.
+3. **Use with `/start`** - Begin every session with `/start` and end with `/end` for continuity.
+
+## Comparison with /save
+
+| Task | /save | /end |
+|------|-------|------|
+| Session log update | ✅ | ✅ |
+| Maintenance scripts | ❌ | ✅ |
+| Coherence check | ❌ | ✅ |
+| Git commit | ❌ | ✅ |
+| Profile updates | ❌ | ✅ |
+
+## Related Workflows
+
+- [/start](/workflows/start) - Boot a new session
+- [/save](/workflows/save) - Mid-session checkpoint without closing
+- [All Workflows](/workflows/all-workflows) - Complete workflow reference

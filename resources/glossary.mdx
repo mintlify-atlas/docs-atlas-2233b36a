@@ -1,0 +1,175 @@
+---
+title: "Glossary"
+description: "Key terms and concepts in the Athena framework"
+---
+
+## Core Concepts
+
+### Athena
+
+The name of this personal AI operating system. Named after the Greek goddess of wisdom and strategic warfare — fitting for a system designed for knowledge management and decision support.
+
+### Bionic Unit
+
+The human + AI collaboration model. Neither component operates alone — the human provides intent, judgment, and verification; the AI provides speed, recall, and pattern recognition. Together: a "bionic" cognitive unit.
+
+### COS (Committee Operating System)
+
+A prompt engineering pattern where the AI operates as multiple "seats" with different perspectives (Strategist, Skeptic, Guardian, etc.) rather than a single voice. Encourages diverse reasoning before output.
+
+### Exocortex
+
+A "second brain" external to your biological memory. Athena functions as an exocortex — a knowledge graph stored as flat files, navigable by any agent that can read Markdown.
+
+## The Laws
+
+Hard-coded decision principles baked into Athena's identity. Non-negotiable.
+
+| Law | Name | Definition |
+|-----|------|------------|
+| **Law #0** | Subjective Utility | Respect the user's preferences — unless they trigger Law #1 |
+| **Law #1** | No Irreversible Ruin | Veto any path with >5% probability of catastrophic, unrecoverable loss (financial, reputational, legal, psychological) |
+| **Law #2** | Context > Effort | If the arena is structurally rigged against you, exit — don't "try harder" |
+| **Law #3** | Actions > Words | Revealed preferences (what people *do*) outweigh stated preferences (what they *say*) |
+| **Law #4** | Modular Architecture | New capabilities must be added as separate files, not bloating core prompts |
+| **Law #5** | Epistemic Rigor | All external claims must be cited. No "orphan statistics" or unsourced assertions |
+
+## Architecture Terms
+
+### Triple Crown Stack
+
+The core technology stack: **Gemini + Claude** (reasoning) + **Supabase/pgvector** (memory) + **Edge Functions** (orchestration). Named for covering all three layers of a cognitive system.
+
+### Temporal Workflow
+
+The 3-phase operating loop: `/start` (boot) → Execute (conversation) → `/end` (persist). Each session builds on the last, creating continuous context inheritance.
+
+### VectorRAG
+
+Retrieval-Augmented Generation using vector embeddings. Athena stores notes/documents as embeddings in Supabase (pgvector), then retrieves semantically similar content at query time to inject into prompts.
+
+### Protocols
+
+Reusable "thinking patterns" stored as Markdown files. Each protocol codifies a specific reasoning approach (e.g., risk analysis, design critique, negotiation). Currently 198 protocols in the library.
+
+### Edge Functions
+
+Serverless TypeScript/Deno functions hosted on Supabase. Used for automation like: GitHub push → auto-embed new documents → sync to vector database.
+
+### Mount Points
+
+Aliases to external folders that exist outside the Athena directory. Enable Athena to manage your life by connecting to folders like Work, Wealth, or Health without mixing them with system files.
+
+## Workflows (Slash Commands)
+
+| Command | Purpose |
+|---------|----------|
+| `/start` | Boot the system, load identity, recall last session, prime semantic memory |
+| `/end` | Close session, summarize insights, commit to persistent storage |
+| `/think` | Deep reasoning mode — multi-step analysis with structured output |
+| `/ultrathink` | Maximum depth — full protocol stack, adversarial stress-testing |
+| `/refactor` | Workspace maintenance — diagnostics, orphan fixes, re-indexing |
+| `/research` | Deep web research with citations |
+| `/diagnose` | Read-only health check of workspace |
+| `/save` | Manual checkpoint mid-session |
+
+## Reasoning Modes
+
+Inspired by *Bleach* anime power scaling (for flavor):
+
+| Mode | Trigger | Description |
+|------|---------|-------------|
+| **Shikai** | `/start` | Default adaptive mode — scales reasoning to query complexity |
+| **Bankai** | `/think` | Deliberate multi-track analysis (Domain + Adversarial + Cross-Domain) |
+| **Shukai** | `/ultrathink` | Maximum depth — exhaustive simulation and zero-point inversion |
+
+## File Structure
+
+| Directory | Purpose |
+|-----------|----------|
+| `.framework/` | Core identity, laws, reasoning standards ("the soul") |
+| `.context/` | Memories, user profile, case studies ("the brain") |
+| `.agent/` | Scripts, workflows, protocols ("the hands") |
+| `examples/` | Templates and sanitized samples for reference |
+| `docs/` | Architecture docs, guides, this glossary |
+
+## Autonomic Behaviors
+
+Automatic processes that run without explicit commands:
+
+| Protocol | Trigger | Action |
+|----------|---------|--------|
+| **Quicksave** | Every user exchange | Checkpoint to session log |
+| **Intent Persistence** | Significant logical change | Document the "WHY" behind code changes |
+| **Latency Indicator** | Every response | Append `[Λ+XX]` complexity score |
+| **Orphan Detection** | On `/end` | Link orphaned files or alert |
+
+## Key Metrics
+
+| Metric | Value |
+|--------|-------|
+| Sessions logged | 500+ |
+| Protocols | 241 |
+| Automation scripts | 97 |
+| Embedded documents | 800+ |
+| Monthly cost | Less than SGD 30 |
+
+## IDE Terms
+
+### Agentic IDE
+
+An integrated development environment with built-in AI assistant capabilities (e.g., Cursor, Antigravity, Windsurf). Unlike traditional IDEs, agentic IDEs can read, write, and execute code autonomously.
+
+### Multi-Root Workspace
+
+A VS Code/Cursor feature allowing multiple project folders to be open simultaneously. Useful for keeping Athena alongside your work projects without merging directories.
+
+## Memory & Context
+
+### Session Log
+
+Markdown file created during each `/start` → `/end` cycle. Contains conversation history, decisions made, and insights discovered. Stored in `.context/memories/session_logs/`.
+
+### Context Window
+
+The amount of text (measured in tokens) an AI model can process at once. Athena is designed to work within these limits through modular loading and semantic retrieval.
+
+### Active Injection
+
+Force-feeding critical constraints into the context window during boot, rather than relying on the AI to read passive documentation files.
+
+### Quicksave
+
+Automatic checkpoint created after every user exchange. Ensures no progress is lost if a session crashes.
+
+## Technical Terms
+
+### RRF (Reciprocal Rank Fusion)
+
+A technique for combining results from multiple search methods (keyword + semantic embeddings) to improve retrieval accuracy.
+
+### Embeddings
+
+Numerical vector representations of text that capture semantic meaning. Used by VectorRAG to find conceptually similar content even when exact keywords don't match.
+
+### pgvector
+
+PostgreSQL extension for storing and querying vector embeddings. Used by Athena's VectorRAG system via Supabase.
+
+### GraphRAG
+
+Knowledge graph-based retrieval system (deprecated in recent versions in favor of VectorRAG).
+
+## Design Philosophy
+
+### Modular > Monolith
+
+Core design principle: AI agents don't read sequentially — they query. A workspace optimized for agents should be a graph of small, addressable nodes, not a monolithic document.
+
+### Sovereignty
+
+Your data stays in files you own. Athena prioritizes local-first architecture where cloud services are optional enhancements, not requirements.
+
+### User-Driven RSI (Recursive Self-Improvement)
+
+The bilateral loop where human and AI improve together through each session, with learnings captured and compounded over time.

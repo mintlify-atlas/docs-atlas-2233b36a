@@ -1,0 +1,344 @@
+---
+title: Best Practices
+description: Operational discipline for running Athena sustainably and preventing data loss
+---
+
+These aren't features — they're **habits that prevent data loss**, reduce friction, and keep your system compounding.
+
+## 1. Back Up Your Data (The Non-Negotiable)
+
+Your `.context/` folder **is** your brain. Losing it means losing every session, every protocol, every insight you've ever extracted.
+
+**Treat it like source code — because it is.**
+
+---
+
+### The 3-2-1 Rule
+
+<CardGroup cols={3}>
+  <Card title="Local" icon="laptop">
+    **Your machine** (primary copy)
+    
+    **Why**: Speed — instant reads, no latency
+  </Card>
+  
+  <Card title="Git" icon="github">
+    **GitHub / GitLab** (full repo push)
+    
+    **Why**: Portability — clone anywhere, restore in seconds
+  </Card>
+  
+  <Card title="Cloud DB" icon="cloud">
+    **Supabase / ChromaDB** (vector embeddings)
+    
+    **Why**: Search — hybrid RAG across your entire history
+  </Card>
+</CardGroup>
+
+<Warning>
+**At minimum, push to Git.** If your laptop dies tomorrow, `git clone` + `/start` gets you back to 100%. Everything else is acceleration.
+</Warning>
+
+---
+
+### Backup Checklist
+
+<Steps>
+  <Step title="Configure Git remote">
+    ```bash
+    git remote -v
+    # Should show your GitHub/GitLab URL
+    ```
+  </Step>
+  
+  <Step title="Enable auto-commit on /end">
+    The shutdown orchestrator commits and pushes automatically when you run `/end`.
+  </Step>
+  
+  <Step title="Review .gitignore">
+    Ensure sensitive files are excluded:
+    
+    ```bash
+    # .gitignore
+    .env
+    *.key
+    .athenad.pid
+    credentials.json
+    ```
+  </Step>
+  
+  <Step title="Activate cloud sync (optional)">
+    For vector embeddings:
+    
+    ```bash
+    python3 scripts/supabase_sync.py
+    ```
+  </Step>
+</Steps>
+
+---
+
+## 2. Session Discipline
+
+### Always `/start` and `/end`
+
+The most common mistake is working without bookends.
+
+- **Without `/start`**: No session log, no context loading, no semantic priming
+- **Without `/end`**: Nothing gets committed, no insights filed, no memory updates
+
+| ✅ Do | ❌ Don't |
+|:------|:---------|
+| `/start` → Work → `/end` | Jump straight into questions without booting |
+| `/save` mid-session for long threads | Rely on the AI to "remember" across sessions |
+| One focused topic per session | Cram five unrelated tasks into one thread |
+
+---
+
+### The One-Feature Rule
+
+Each session should target **one deliverable**. This isn't about being rigid — it's about context coherence.
+
+<Tip>
+**Guideline**: If you can't summarize the session in one sentence, it was probably two sessions.
+</Tip>
+
+**Example good sessions**:
+- "Implement JWT authentication"
+- "Research vector database options"
+- "Refactor user profile component"
+
+**Example bad session**:
+- "Implement auth, redesign UI, fix database schema, and research deployment options"
+
+---
+
+## 3. Memory Hygiene
+
+### Prune `activeContext.md` Regularly
+
+`activeContext.md` is your **working memory** — not your archive. If it grows beyond ~100 lines, it's carrying stale context that wastes tokens on every boot.
+
+| Signal | Action |
+|:-------|:-------|
+| Completed tasks still listed | Move to session log, mark `[x]`, or delete |
+| "Recent Context" older than 1 week | Archive to session logs or compact |
+| Duplicate entries | Merge or remove |
+
+### Keep `userContext.md` Lean
+
+Your user profile should contain **stable truths**, not session-specific details.
+
+| ✅ Belongs in userContext | ❌ Belongs in activeContext |
+|:-------------------------|:----------------------------|
+| Programming languages you know | Current project you're working on |
+| Work hours and timezone | Today's tasks |
+| Core values and constraints | Recent decisions |
+| Tools and environment setup | Temporary reminders |
+
+---
+
+## 4. Git Workflow
+
+### Commit Often, Push Always
+
+| Practice | Rationale |
+|:---------|:----------|
+| Commit after every `/end` | Atomic, searchable history |
+| Use semantic commit messages | `feat:`, `fix:`, `docs:` prefixes make `git log` useful |
+| Push to remote same day | Local commits aren't backups — they're drafts |
+| Tag major milestones | `git tag v9.2.5` lets you rollback cleanly |
+
+### Example Commit Messages
+
+```bash
+# Good
+git commit -m "feat: add JWT authentication"
+git commit -m "docs: update protocol 123 with examples"
+git commit -m "fix: correct session log timestamp format"
+
+# Bad
+git commit -m "updates"
+git commit -m "wip"
+git commit -m "stuff"
+```
+
+---
+
+### Branch Strategy (Advanced)
+
+For users maintaining both **private** (full context) and **public** (sanitized) repos:
+
+```text
+main        ← public-facing (Athena-Public)
+private     ← full context (.context/, personal protocols)
+```
+
+<Warning>
+**Never push `.context/memory_bank/` to a public repo.** It contains personal data (psychology, decisions, constraints). Use `.syncignore` or `.gitignore` to exclude sensitive directories.
+</Warning>
+
+---
+
+## 5. Token Budget Awareness
+
+Athena boots at ~10K tokens, leaving ~190K for your session. But token waste adds up:
+
+| Waste Source | Fix |
+|:-------------|:----|
+| Oversized `activeContext.md` | Prune weekly |
+| Loading files you don't need | Trust JIT routing — don't `/fullload` unless needed |
+| Repeating context the AI already has | Reference session logs instead of re-explaining |
+| Pasting entire files into chat | Point to the file path — let the agent read it |
+
+---
+
+## 6. Multi-Account / Multi-Model Strategy
+
+If you use multiple AI accounts or models:
+
+| Practice | Why |
+|:---------|:----|
+| **Designate a "primary" for Athena sessions** | Consistency in session logs and memory |
+| **Use secondary accounts for research** | Keeps your primary context clean |
+| **Run Trilateral Feedback for big decisions** | Cross-validate across Claude, Gemini, GPT |
+| **Always return to primary for `/end`** | Ensures the canonical session log is written |
+
+<Info>
+The Memory Bank means your context is **decoupled from the provider**. Switch models freely — the state lives in your filesystem, not their servers.
+</Info>
+
+---
+
+## 7. Security Basics
+
+| Practice | Details |
+|:---------|:--------|
+| **Never commit `.env` files** | Use `.env.example` as a template, `.gitignore` the real one |
+| **Rotate API keys periodically** | Especially after sharing screens or running demos |
+| **Use Secret Mode for demos** | `set_secret_mode(True)` redacts sensitive data |
+| **Review agent permissions** | Don't grant filesystem access to `~/.ssh` or credential stores |
+
+---
+
+## 8. When Things Go Wrong
+
+<Accordion title="Lost local data">
+  **Recovery**:
+  ```bash
+  git clone https://github.com/yourusername/athena-workspace
+  cd athena-workspace
+  /start
+  # Back in business
+  ```
+</Accordion>
+
+<Accordion title="Corrupted session log">
+  **Recovery**:
+  ```bash
+  # Check git history
+  git log --oneline
+  
+  # Rollback to last clean commit
+  git checkout <commit-hash> -- .context/sessions/
+  ```
+</Accordion>
+
+<Accordion title="Boot fails">
+  **Diagnosis**:
+  ```bash
+  python -m athena doctor
+  ```
+  
+  Common causes:
+  - Missing dependencies
+  - Corrupt `activeContext.md`
+  - Invalid YAML frontmatter in workflows
+</Accordion>
+
+<Accordion title="Context feels 'off'">
+  **Review**:
+  ```bash
+  # Check for stale/incorrect entries
+  cat .context/memory_bank/activeContext.md
+  
+  # Prune and restart
+  /end
+  /start
+  ```
+</Accordion>
+
+<Accordion title="Model quality drops mid-session">
+  **Cause**: You've likely hit ~150K tokens.
+  
+  **Fix**:
+  ```bash
+  /save
+  /end
+  # Start fresh session
+  /start
+  ```
+</Accordion>
+
+---
+
+## Quick Reference Checklist
+
+```text
+✅ Git push after every session
+✅ One feature per session
+✅ Prune activeContext.md weekly
+✅ Keep userContext.md stable
+✅ Use /save for long sessions
+✅ Review .gitignore before first push
+
+❌ Don't skip /start and /end
+❌ Don't push .env or personal memory to public repos
+❌ Don't /fullload unless you need deep context
+❌ Don't paste entire files — point to paths
+```
+
+---
+
+## Weekly Maintenance Routine
+
+<Steps>
+  <Step title="Monday: Prune activeContext.md">
+    Remove completed tasks and stale context from last week.
+  </Step>
+  
+  <Step title="Wednesday: Regenerate TAG_INDEX">
+    ```bash
+    python3 scripts/generate_tag_index.py
+    ```
+  </Step>
+  
+  <Step title="Friday: Run /refactor">
+    Deep system optimization:
+    ```bash
+    /refactor
+    ```
+    
+    This runs audits, scans, and integrity checks that are too heavy for `/end`.
+  </Step>
+  
+  <Step title="Sunday: Sync to Supabase">
+    ```bash
+    python3 scripts/supabase_sync.py
+    ```
+  </Step>
+</Steps>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Creating Workflows" href="/guides/creating-workflows" icon="workflow">
+    Learn how to build custom slash-command workflows
+  </Card>
+  
+  <Card title="Writing Protocols" href="/guides/writing-protocols" icon="file-code">
+    Create reusable decision-making protocols
+  </Card>
+</CardGroup>

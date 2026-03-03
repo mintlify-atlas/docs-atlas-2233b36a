@@ -1,0 +1,605 @@
+---
+title: "Session Management"
+description: "Complete guide to Athena's session lifecycle, checkpointing system, and cognitive load tracking."
+---
+
+## Overview
+
+The `athena.sessions` module provides unified session lifecycle management with:
+
+- **Automatic Session Creation** - Daily session numbering and templating
+- **Checkpoint System** - Timestamped progress tracking
+- **Lambda (Λ) Metrics** - Cognitive load measurement
+- **Lineage Tracking** - Bidirectional session linking
+- **Learning Extraction** - Structured insight capture
+
+<Info>
+  Session logs are stored in markdown format with YAML frontmatter in the `SESSIONS_DIR` directory.
+</Info>
+
+## Core Functions
+
+### `create_session() -> Path`
+
+Create a new session log with template structure.
+
+**Returns:**
+- `Path` - Path to the newly created session file
+
+**Example:**
+
+```python
+from athena.sessions import create_session
+
+session_path = create_session()
+print(f"Created session: {session_path.name}")
+# Output: Created session: 2026-03-03-session-01.md
+```
+
+**Session Filename Format:**
+
+```
+YYYY-MM-DD-session-NN.md
+```
+
+Where `NN` is auto-incremented for each session on the same day.
+
+Reference: `sessions.py:98-225`
+
+### `append_checkpoint(summary: str, bullets: Optional[List[str]] = None, log_path: Optional[Path] = None)`
+
+Append a timestamped checkpoint to the active session.
+
+**Parameters:**
+- `summary` (str) - Brief checkpoint description
+- `bullets` (Optional[List[str]]) - Bullet points for details
+- `log_path` (Optional[Path]) - Target session (defaults to current)
+
+**Example:**
+
+```python
+from athena.sessions import append_checkpoint
+
+append_checkpoint(
+    summary="Implemented vector search API",
+    bullets=[
+        "Added thread-safe client wrapper",
+        "Implemented embedding cache",
+        "Created search wrappers for 10 collections"
+    ]
+)
+```
+
+**Generated Checkpoint:**
+
+```markdown
+### [14:32 SGT] Checkpoint
+
+**Summary**: Implemented vector search API
+
+- Added thread-safe client wrapper
+- Implemented embedding cache
+- Created search wrappers for 10 collections
+
+---
+```
+
+Reference: `sessions.py:297-320`
+
+### `recall_last_session() -> Optional[Path]`
+
+Find and return the most recent session log file.
+
+**Returns:**
+- `Optional[Path]` - Path to last session, or `None` if not found
+
+**Example:**
+
+```python
+from athena.sessions import recall_last_session
+
+last_session = recall_last_session()
+if last_session:
+    content = last_session.read_text()
+    print(f"Last session: {last_session.name}")
+```
+
+Reference: `sessions.py:43-47`
+
+### `parse_yaml_frontmatter(content: str) -> tuple[Dict[str, Any], int]`
+
+Extract YAML frontmatter from session log.
+
+**Parameters:**
+- `content` (str) - Full session file content
+
+**Returns:**
+- `tuple[Dict, int]` - (metadata dictionary, body start index)
+
+**Example:**
+
+```python
+from pathlib import Path
+from athena.sessions import parse_yaml_frontmatter
+
+session_file = Path("2026-03-03-session-01.md")
+content = session_file.read_text()
+
+metadata, body_start = parse_yaml_frontmatter(content)
+
+print(f"Session ID: {metadata['session_id']}")
+print(f"Status: {metadata['status']}")
+print(f"Focus: {metadata['focus']}")
+
+body = content[body_start:]
+```
+
+**Fallback Behavior:**
+
+If YAML parsing fails, uses simple key-value extraction:
+
+```python
+metadata = {}
+for line in yaml_content.split("\n"):
+    if ":" in line:
+        key, value = line.split(":", 1)
+        metadata[key.strip()] = value.strip()
+```
+
+Reference: `sessions.py:16-40`
+
+## Session Template Structure
+
+Each new session is created with this template:
+
+```markdown
+---
+session_id: 2026-03-03-session-01
+date: 2026-03-03
+start: 2026-03-03T14:25:00+08:00
+end:
+duration_min:
+status: in_progress
+verdict:
+prev_session: 2026-03-02-session-03
+next_session:
+focus:
+threads: []
+tags: []
+lambda_peak:
+lambda_total:
+lambda_coverage:
+lambda_coverage_n:
+lambda_coverage_d:
+---
+
+# Session Log: 2026-03-03 (Session 01)
+
+**Date**: 2026-03-03
+**Time**: 14:25 - ...
+**Focus**: ...
+**Related Sessions**: ← 2026-03-02-session-03
+
+---
+
+## 0. R__ Compressed Context
+
+> Auto-generated on close by `shutdown.py`. Do not manually edit.
+
+## 1. Checkpoints
+
+> Automatically appended by `quicksave.py`. Do not manually write.
+
+## 2. Key Decisions & Insights
+
+- **Decision**: ...
+- **Insight**: ...
+
+## 2.5 Learnings (Compiler Inputs)
+
+### Learned (System / Workflow)
+
+- [S] ...
+
+### Learned (About User)
+
+- [U] ...
+
+### Integration Requested
+
+- [X] ...
+
+## 3. Action Items & Deferred
+
+| ID | Action | Owner | Status | Thread |
+|----|--------|-------|--------|--------|
+| 2026-03-03-session-01-A1 | ... | AI / User | Pending | — |
+
+## 4. Artifacts & Outputs
+
+- **Created**: ...
+- **Modified**: ...
+
+## Session Closed
+
+**Status**: ⏳ In Progress
+**Verdict**: ... (🚀 SQUAD / ⚠️ Partial / 🔴 Blocked)
+
+## Tagging
+
+#session #...
+```
+
+Reference: `sessions.py:113-217`
+
+## Lambda (Λ) Cognitive Load Tracking
+
+### Overview
+
+Athena tracks cognitive complexity using `[Λ+XX]` tags in checkpoints:
+
+```markdown
+### [14:32 SGT] Checkpoint [Λ+45]
+
+**Summary**: Refactored authentication system
+```
+
+### Extract Lambda Stats
+
+```python
+from athena.sessions import extract_lambda_stats
+
+session_content = session_path.read_text()
+stats = extract_lambda_stats(session_content)
+
+print(f"Peak Load: {stats['peak']}")
+print(f"Total Load: {stats['total']}")
+print(f"Coverage: {stats['coverage']}")  # e.g., "5/8"
+print(f"Coverage Fraction: {stats['coverage_n']}/{stats['coverage_d']}")
+```
+
+**Return Structure:**
+
+```python
+{
+    "peak": 67,           # Highest Λ value
+    "total": 203,         # Sum of all Λ values
+    "coverage": "5/8",    # Λ tags / total checkpoints
+    "coverage_n": 5,      # Number of checkpoints with Λ
+    "coverage_d": 8       # Total checkpoint count
+}
+```
+
+**Checkpoint Header Patterns:**
+
+Supports multiple formats:
+
+- `### ⚡ Checkpoint [14:32]`
+- `### [14:32 SGT] Checkpoint`
+- `### Checkpoint [14:32]`
+
+Reference: `sessions.py:238-265`
+
+## Learning Extraction
+
+### Extract Learnings
+
+```python
+from athena.sessions import extract_learnings
+
+session_content = session_path.read_text()
+system, user, integration = extract_learnings(session_content)
+
+print("System Learnings:")
+for learning in system:
+    print(f"  - [S] {learning}")
+
+print("\nUser Learnings:")
+for learning in user:
+    print(f"  - [U] {learning}")
+
+print("\nIntegration Requests:")
+for request in integration:
+    print(f"  - [X] {request}")
+```
+
+**Learning Categories:**
+
+| Tag | Category | Purpose |
+|:----|:---------|:--------|
+| `[S]` | System/Workflow | Process improvements, tool learnings |
+| `[U]` | User Preferences | User behavior patterns, preferences |
+| `[X]` | Integration Requests | Features to integrate into system |
+
+**Example Learnings Section:**
+
+```markdown
+## 2.5 Learnings (Compiler Inputs)
+
+### Learned (System / Workflow)
+
+- [S] Thread-local clients prevent httpx state corruption
+- [S] Atomic writes require temp file + os.replace() pattern
+
+### Learned (About User)
+
+- [U] Prefers detailed error messages with fix suggestions
+- [U] Values performance optimizations over abstractions
+
+### Integration Requested
+
+- [X] Add automatic retry logic to all API calls
+- [X] ✅ Implement embedding cache (completed)
+```
+
+Reference: `sessions.py:268-294`
+
+## Session Lineage
+
+### Forward Lineage Updates
+
+```python
+from athena.sessions import update_forward_lineage
+
+prev_id = "2026-03-02-session-03"
+current_id = "2026-03-03-session-01"
+
+update_forward_lineage(prev_id, current_id)
+```
+
+**What it does:**
+
+1. Finds previous session file: `2026-03-02-session-03.md`
+2. Locates `next_session: null` in YAML frontmatter
+3. Updates to `next_session: 2026-03-03-session-01`
+4. Writes file atomically
+
+**Archive Support:**
+
+Automatically checks `SESSIONS_DIR/archive/` if session not found in main directory.
+
+Reference: `sessions.py:67-95`
+
+### Get Next Session Number
+
+```python
+from athena.sessions import get_next_session_number
+from datetime import datetime
+
+today = datetime.now().strftime("%Y-%m-%d")
+next_num = get_next_session_number()
+
+session_id = f"{today}-session-{next_num:02d}"
+print(session_id)  # 2026-03-03-session-02
+```
+
+**Logic:**
+
+1. Scans `SESSIONS_DIR` for today's sessions
+2. Extracts highest session number via regex: `^YYYY-MM-DD-session-(\d{2,3})\.md$`
+3. Returns `max_session + 1`
+
+Reference: `sessions.py:50-64`
+
+## Decision Logging
+
+### Log to Decision Ledger
+
+```python
+from athena.sessions import log_to_decision_ledger
+
+log_to_decision_ledger(
+    summary="Switched to Gemini embeddings",
+    rationale="3072 dimensions provide better semantic resolution than 1536"
+)
+```
+
+**Appends to:** `CONTEXT_DIR/DECISION_LOG.md`
+
+**Format:**
+
+```markdown
+## [2026-03-03 14:45] Switched to Gemini embeddings
+**Rationale**: 3072 dimensions provide better semantic resolution than 1536
+---
+```
+
+Reference: `sessions.py:323-336`
+
+## Metadata Updates
+
+### Update Session Metadata
+
+```python
+from athena.sessions import update_session_metadata
+
+update_session_metadata(
+    new_tokens=1250,
+    thread_id="thread_abc123"
+)
+```
+
+**What it updates:**
+
+- `tokens` - Increments existing token count
+- `thread_id` - Sets conversation thread identifier
+
+**Process:**
+
+1. Loads current session YAML frontmatter
+2. Updates specified fields
+3. Writes back to file preserving structure
+
+Reference: `sessions.py:339-373`
+
+## Advanced Usage
+
+### Create Session with Custom Path
+
+```python
+from pathlib import Path
+from athena.sessions import append_checkpoint
+
+custom_session = Path("custom_sessions/debug-session-01.md")
+
+append_checkpoint(
+    summary="Debug checkpoint",
+    log_path=custom_session
+)
+```
+
+### Batch Extract Lambda Stats
+
+```python
+from pathlib import Path
+from athena.sessions import extract_lambda_stats
+from athena.core.config import SESSIONS_DIR
+
+session_files = sorted(SESSIONS_DIR.glob("2026-03-*.md"))
+
+for session_file in session_files:
+    content = session_file.read_text()
+    stats = extract_lambda_stats(content)
+    
+    print(f"{session_file.name}:")
+    print(f"  Peak: {stats['peak']}")
+    print(f"  Coverage: {stats['coverage']}")
+```
+
+### Multi-Session Learning Aggregation
+
+```python
+from athena.sessions import extract_learnings
+from athena.core.config import SESSIONS_DIR
+
+all_system = []
+all_user = []
+
+for session_file in SESSIONS_DIR.glob("2026-03-*.md"):
+    content = session_file.read_text()
+    system, user, _ = extract_learnings(content)
+    
+    all_system.extend(system)
+    all_user.extend(user)
+
+print(f"Total System Learnings: {len(all_system)}")
+print(f"Total User Learnings: {len(all_user)}")
+```
+
+## Configuration
+
+Session directories are defined in `athena.core.config`:
+
+```python
+from athena.core.config import SESSIONS_DIR, CONTEXT_DIR
+
+print(f"Sessions: {SESSIONS_DIR}")
+print(f"Context: {CONTEXT_DIR}")
+```
+
+**Typical Structure:**
+
+```
+project_root/
+├── .athena/
+│   ├── sessions/
+│   │   ├── 2026-03-01-session-01.md
+│   │   ├── 2026-03-02-session-01.md
+│   │   ├── 2026-03-03-session-01.md
+│   │   └── archive/
+│   │       └── 2026-02-*.md
+│   └── context/
+│       ├── DECISION_LOG.md
+│       └── ...
+```
+
+## Troubleshooting
+
+### "Active session log not found"
+
+**Cause**: No session file exists or `get_current_session_log()` returns `None`
+
+**Fix**: Create a session first:
+```python
+from athena.sessions import create_session
+create_session()
+```
+
+### YAML parsing fails
+
+**Symptom**: `parse_yaml_frontmatter()` returns empty dict
+
+**Cause**: Malformed YAML (missing `---` delimiters)
+
+**Fix**: Function automatically falls back to simple key-value parsing.
+
+### Checkpoint not appearing
+
+**Cause**: Invalid log path or file permissions
+
+**Fix**: Verify session file exists:
+```python
+from athena.sessions import recall_last_session
+
+session = recall_last_session()
+if session:
+    print(f"Current session: {session}")
+else:
+    print("No active session. Create one first.")
+```
+
+## Best Practices
+
+### Checkpoint Frequency
+
+```python
+# ✅ Good: Checkpoint after meaningful progress
+append_checkpoint(
+    summary="Completed vector DB integration",
+    bullets=["Thread-safe clients", "Embedding cache", "10 search wrappers"]
+)
+
+# ❌ Avoid: Too granular
+append_checkpoint(summary="Fixed typo")
+```
+
+### Lambda Tagging
+
+```python
+# ✅ Good: Tag complex cognitive tasks
+append_checkpoint(
+    summary="Designed multi-agent coordination protocol [Λ+65]"
+)
+
+# ❌ Avoid: Tagging trivial tasks
+append_checkpoint(
+    summary="Updated README [Λ+5]"  # Too low complexity
+)
+```
+
+### Learning Documentation
+
+Write specific, actionable learnings:
+
+```markdown
+### Learned (System / Workflow)
+
+✅ Good:
+- [S] Thread-local Supabase clients prevent httpx connection state corruption in parallel loops
+- [S] Atomic writes require temp file + os.replace() to prevent partial writes
+
+❌ Avoid:
+- [S] Fixed threading issue
+- [S] Made writes safer
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Vector Database" icon="database" href="/sdk/memory/vector-db">
+    Learn semantic search and embedding APIs
+  </Card>
+  <Card title="Memory Overview" icon="brain" href="/sdk/memory/overview">
+    Return to memory system overview
+  </Card>
+</CardGroup>

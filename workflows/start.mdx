@@ -1,0 +1,57 @@
+---
+title: "/start - Boot Session"
+description: "Initialize Athena, load context, and begin a new session with ultra-low latency"
+---
+
+# /start — Boot Session
+
+The `/start` workflow boots the Athena system and loads essential context for a new session. Designed for ultra-low latency (under 2K tokens), it follows the philosophy of "boot fast, load later."
+
+## When to Use
+
+- Beginning of every session
+- After a restart or context reset
+- When you need to reload identity and workspace state
+
+## Behavior
+
+### Phase 1: Instant Boot
+
+The workflow executes three critical tasks:
+
+1. **Load Core Identity** - Loads `.framework/v8.0-alpha/modules/Core_Identity.md` containing Laws, Identity, and RSI
+2. **Load Workspace State** - Reads `.context/project_state.md` for current workspace status
+3. **Create Session Log** - Initializes a new session log in `session_logs/`
+
+**Output**: "⚡ Ready. (Core Identity loaded. Session XX started.)"
+
+### Phase 2: Triple-Lock Reminder
+
+Every response in Athena follows the Triple-Lock pattern:
+
+1. **Search** (Semantic) → FIRST
+2. **Save** (Quicksave) → SECOND
+3. **Speak** (Response) → LAST
+
+## Usage Example
+
+```
+User: /start
+
+Athena: ⚡ Ready. (Core Identity loaded. Session 42 started.)
+```
+
+## Quick Reference
+
+| Command | Effect |
+|---------|--------|
+| `/start` | Boot system (this workflow) |
+| `/end` | Close session, commit to memory |
+| `/save` | Mid-session checkpoint |
+| `/think` | Deep reasoning mode |
+
+## Related Workflows
+
+- [/end](/workflows/end) - Close session and save learnings
+- [/save](/workflows/save) - Mid-session checkpoint
+- [All Workflows](/workflows/all-workflows) - Complete workflow reference

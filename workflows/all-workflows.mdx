@@ -1,0 +1,316 @@
+---
+title: "All Workflows"
+description: "Complete reference of all 50+ slash command workflows available in Athena"
+---
+
+# All Workflows
+
+Workflows are slash commands that trigger predefined sequences of actions. They're the backbone of Athena's session management and deep reasoning capabilities.
+
+## Quick Reference
+
+| Command | Purpose | Complexity |
+|---------|---------|------------|
+| [/start](/workflows/start) | Boot session, load identity | Low |
+| [/end](/workflows/end) | Close session, commit to memory | Low |
+| [/save](/workflows/save) | Mid-session checkpoint | Low |
+| [/think](/workflows/think) | Deep reasoning (all phases) | Medium |
+| /ultrathink | Maximum depth (parallel orchestrator) | High |
+| [/research](/workflows/research) | Exhaustive multi-source investigation | High |
+| /search | Web search with citations | Medium |
+| /plan | Structured planning with pre-mortem | Medium |
+| /brief | Pre-prompt clarification protocol | Medium |
+| /refactor | Full workspace optimization | High |
+| /vibe | Ship at 70%, iterate fast | Low |
+| /deploy | Sanitized public repo sync | Medium |
+
+---
+
+## Core Workflows by Category
+
+### Session Management
+
+#### /start
+**When to Use**: Beginning of every session
+
+Loads identity, recalls context from previous sessions. Ultra-low latency boot (less than 2K tokens) following the "boot fast, load later" philosophy.
+
+[View details →](/workflows/start)
+
+#### /end
+**When to Use**: End of every session
+
+Commits insights to memory, updates indexes. Reviews session, synthesizes key decisions, and creates git commit.
+
+[View details →](/workflows/end)
+
+#### /save
+**When to Use**: Mid-session checkpoint
+
+Use before risky experiments or when switching contexts. Creates lightweight checkpoint without full maintenance overhead.
+
+[View details →](/workflows/save)
+
+#### /tutorial
+**When to Use**: Your very first session
+
+Guided walkthrough of all features, includes profile interview. Best for onboarding new users.
+
+---
+
+### Reasoning Depth
+
+#### /think
+**Depth**: High | **Token Budget**: ~2000 tokens
+
+**When to Use**: Important decisions, complex problems
+
+Executes all phases (0-VII) including counterfactuals and confrontation. Mandatory stress-testing and multi-path reasoning.
+
+[View details →](/workflows/think)
+
+#### /ultrathink
+**Depth**: Maximum | **Token Budget**: ~5000+ tokens
+
+**When to Use**: Life-altering decisions, multi-stakeholder analysis
+
+Parallel orchestrator mode (v3.0) with true parallel API calls, adversarial convergence gate, and recursive analysis. Includes Senior Principal Review (Protocol 335) for architecture and technical decisions.
+
+**Rule**: Default to normal mode. Escalate to `/think` for $10K+ decisions. Use `/ultrathink` only for maximum-depth analysis.
+
+---
+
+### Research & Search
+
+#### /search
+**Searches**: 2-3 | **Sources Read**: 0-2 | **Depth**: Medium
+
+**When to Use**: Fact-checking, current events, recent developments
+
+Multi-query search with cross-referencing, citation-dense output, and blind-spot coverage.
+
+#### /research
+**Searches**: 5-10+ | **Sources Read**: 3-10+ | **Depth**: Maximum
+
+**When to Use**: Market research, regulatory deep-dives, due diligence
+
+Exhaustive investigation with 6 mandatory layers:
+1. Initial survey (5-10 searches)
+2. Source deep-dive
+3. Follow rabbit holes (2-3 levels)
+4. Cross-domain synthesis
+5. Adversarial stress-test
+6. Actionable distillation
+
+[View details →](/workflows/research)
+
+#### Triple Crown Mode (`/think /search /research`)
+**When to Use**: Life-altering decisions, maximum stakes
+
+Combines all three for nuclear-level investigation:
+- 10-20+ exhaustive searches
+- 5-10 full articles read
+- 3+ level rabbit holes
+- Full Phase 0-VII analysis
+- Adversarial red-team testing
+- Permanent Codex deposit
+
+---
+
+### Planning Workflows
+
+#### /brief — Pre-Prompt Clarification
+**When to Use**: Before complex tasks to clarify requirements
+
+Measure twice, cut once. Clarifies requirements before wasting tokens on wrong output.
+
+**Variants**:
+- `/brief` — Core brief (default)
+- `/brief ++` — Expanded fields for complex work
+- `/brief build` — Technical implementation tasks
+- `/brief research` — Investigation/analysis tasks
+- `/brief interview` — Iterative Q&A to extract requirements
+
+**Interview Mode** (v3.1): Iterative questioning (10 max per turn) instead of overwhelming dumps. Continues until full clarity is achieved, then writes spec to `.context/specs/[PROJECT]_SPEC.md`.
+
+#### /plan — Structured Task Planning
+**When to Use**: Heavy tasks (new features, refactors, architecture changes)
+
+**Process**:
+1. Enter PLANNING mode
+2. Generate implementation plan with pre-mortem
+3. Review with user before execution
+4. Track progress in `task.md`
+
+Applies Protocol 272 (Harness Engineering): Define constraints so tightly that execution is trivial.
+
+---
+
+### Maintenance Workflows
+
+#### /refactor — Full Workspace Optimization
+**Latency**: HIGH (~15-30 min) | **Philosophy**: Flawless or nothing
+
+**When to Use**: Periodically to maintain workspace integrity
+
+**Phases**:
+1. Diagnostics (invoke /diagnose)
+2. Pre-remediation checkpoint
+3. Fix orphans/broken links
+4. Optimization pass
+5. Supabase memory sync
+6. Cache refresh
+7. Index regeneration
+8. Regression test validation
+9. Commit
+
+**Flags**: `--dry-run` to preview changes
+
+**Refactor Levels**:
+- Level 1 (Hygiene): < 1 week since last, formatting only
+- Level 2 (Component): Modules broken, schemas drifted
+- Level 3 (Architecture): Core framework rot, perf bottlenecks
+- Level 4 (Rewrite): "Red Zone" (Avoid)
+
+#### /vibe — Vibe Coding Mode
+**Philosophy**: Speed > Perfection. Ship at 70%.
+
+**When to Use**: Rapid iteration, prototyping
+
+**Principles**:
+- Prototype in hours, not days
+- Ship → Feedback → Improve
+- Working > Perfect
+- Bias to action
+
+**SEO Pre-Ship Checklist** (mandatory for pages):
+- [ ] Keyword in H1/Title
+- [ ] Internal linking
+- [ ] Descriptive URL slug
+- [ ] Meta description
+
+---
+
+### Business & Strategy Workflows
+
+#### /due-diligence (alias: /dd)
+**When to Use**: Friend asks for money, startup pitch, franchise opportunity
+
+**Process**:
+1. **Kill Switch Check** (5 min) - Regulatory/structural deal-breakers
+2. **Framework Cascade** (15 min) - PESTLE, Five Forces, SWOT, Funding Source Ladder
+3. **Financial Model** (15 min) - 3 scenarios (Worst/Realistic/Best) with EV calculation
+4. **Human-AI Discussion** (10 min) - Clarify assumptions
+5. **Cross-Model Peer Review** (15 min) - Submit to multiple SOTA models
+6. **Final Synthesis** (10 min) - Report with recommendation
+
+**Red Flags**:
+- Approaching friends, not banks (institutional rejection likely)
+- No personal capital at risk (zero skin in game)
+- Undefined exit mechanism (no liquidity)
+- "Trust me" instead of data (governance risk)
+
+#### /brand-generator — Agency Arbitrage
+**Value**: $10,000 (Agency Rate) vs ~$0 (AI Rate) | **Time**: ~20 Minutes
+
+**When to Use**: Building a brand or refreshing existing brand identity
+
+**Phases**:
+1. **Brand DNA Extraction** (Optional) - Use Google Labs (Pomelli) to extract from existing URL
+2. **Strategic DNA** - Generate Mission, Values, Voice, Archetype
+3. **Visual Synthesis** - Generate high-fidelity logo concepts
+4. **Asset Refining** - Convert to professional vector assets
+5. **Brand Book** - Package into deliverable PDF
+
+**Tools**: Athena + Vectorizer.ai + Gamma.app
+
+---
+
+### Deployment & Sync Workflows
+
+#### /deploy — Public Repo Synchronization
+**When to Use**: Publishing sanitized content to public repository
+
+**Process**:
+1. Context Assessment - Identify what's ready for public release
+2. Sanitization Protocol - Strip PII, financials, locations, harsh tone
+3. Deployment Execution - Copy to public repo structure
+4. Git Synchronization - Commit and push
+5. Verification - Confirm success
+
+**Explicit Exclusions**:
+- Psychology Profiles
+- Risk Playbooks
+- Private Case Studies (unless fully sanitized)
+
+---
+
+## Creating Custom Workflows
+
+Workflows live in `.agent/workflows/` as Markdown files:
+
+```yaml
+---
+description: Short description for the workflow index
+created: YYYY-MM-DD
+last_updated: YYYY-MM-DD
+---
+
+# /command-name — Title
+
+## Behavior
+
+What happens when invoked...
+
+## Phases
+
+Step-by-step execution...
+
+## Tagging
+
+#workflow #automation
+```
+
+**Conventions**:
+- Use `// turbo` annotation above steps that are safe to auto-run
+- Reference other workflows with relative links
+- Include rollback instructions for destructive operations
+
+---
+
+## Best Practices
+
+1. **Choose the right depth**: Don't `/ultrathink` on simple queries
+2. **Checkpoint often**: Use `/save` before risky experiments
+3. **Brief first**: For complex tasks, `/brief` reduces wasted tokens
+4. **End sessions properly**: `/end` commits insights to long-term memory
+5. **Combine strategically**: `/think /search /research` for maximum coverage
+
+---
+
+## Workflow Comparison Matrix
+
+| Workflow | Latency | Token Budget | Auto-Run | Destructive | Output |
+|----------|---------|--------------|----------|-------------|--------|
+| /start | Ultra-Low | Less than 2K | Partial | No | Session init |
+| /end | Low | Less than 1K | Partial | No | Git commit |
+| /save | Ultra-Low | Less than 500 | Yes | No | Checkpoint |
+| /think | Medium | ~2K | No | No | Analysis |
+| /ultrathink | High | ~5K+ | No | No | Deep analysis |
+| /search | Low | Less than 1K | No | No | Cited findings |
+| /research | High | ~3K+ | No | No | Research report |
+| /brief | Low | Less than 1K | No | No | Spec document |
+| /plan | Medium | ~1K | No | No | Implementation plan |
+| /refactor | Very High | ~2K | Partial | Yes | Workspace optimization |
+| /vibe | Variable | Variable | No | No | Rapid prototype |
+| /deploy | Medium | Less than 1K | Partial | Yes | Public sync |
+| /due-diligence | High | ~2K | No | No | Investment report |
+| /brand-generator | Medium | ~1K | No | No | Brand package |
+
+---
+
+## Further Reading
+
+- [Architecture](/docs/architecture) - System design
+- [Getting Started](/docs/getting-started) - Setup guide
+- [Protocols](/docs/protocols) - Decision frameworks

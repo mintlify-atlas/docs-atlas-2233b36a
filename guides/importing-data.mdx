@@ -1,0 +1,431 @@
+---
+title: Importing Data
+description: Bring existing knowledge from other AI platforms and sources into your Athena workspace
+---
+
+Athena's memory is just Markdown files. Any text you can export becomes part of your memory.
+
+## Overview
+
+Importing data into Athena is as simple as copying Markdown files into your `.context/` directory. The next time you run `/start`, Athena automatically:
+
+- Scans for new or changed files
+- Generates embeddings for semantic search
+- Updates the TAG_INDEX for entity lookup
+- Makes the content available for retrieval
+
+**The import process is non-destructive** — your original files are preserved as-is.
+
+---
+
+## Supported Sources
+
+<Tabs>
+  <Tab title="ChatGPT">
+    ### Exporting from ChatGPT
+    
+    <Steps>
+      <Step title="Access Settings">
+        Go to Settings → Data Controls
+      </Step>
+      
+      <Step title="Request Export">
+        Click "Export data" and wait for the download link (usually emailed within 24 hours)
+      </Step>
+      
+      <Step title="Extract Conversations">
+        Download the ZIP file and extract. Look for `conversations.json`
+      </Step>
+      
+      <Step title="Convert to Markdown">
+        Convert JSON to Markdown files (one per conversation):
+        
+        ```bash
+        # Use a converter script or manually format
+        python3 scripts/convert_chatgpt.py conversations.json --output .context/memories/imports/
+        ```
+      </Step>
+      
+      <Step title="Clean up">
+        Remove system messages, timestamps, and formatting artifacts that don't add meaningful context.
+      </Step>
+    </Steps>
+    
+    ### What to Keep
+    
+    - ✅ Core conversation content
+    - ✅ Insights and decisions
+    - ✅ Code examples and solutions
+    - ❌ System metadata
+    - ❌ Timestamps and user IDs
+    - ❌ Formatting artifacts
+  </Tab>
+  
+  <Tab title="Gemini">
+    ### Exporting from Gemini
+    
+    <Steps>
+      <Step title="Access Google Takeout">
+        Go to [Google Takeout](https://takeout.google.com/)
+      </Step>
+      
+      <Step title="Select Gemini Apps">
+        Deselect all → Select only "Gemini Apps"
+      </Step>
+      
+      <Step title="Request Export">
+        Click "Next" → Choose file format (ZIP) → "Create export"
+      </Step>
+      
+      <Step title="Download and Extract">
+        Download the archive when ready (usually within a few hours)
+      </Step>
+      
+      <Step title="Import to Athena">
+        Copy relevant Markdown files to `.context/memories/imports/`:
+        
+        ```bash
+        cp -r ~/Downloads/Takeout/Gemini/*.md .context/memories/imports/
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Claude">
+    ### Exporting from Claude
+    
+    <Steps>
+      <Step title="Access Settings">
+        Go to Settings → Privacy & Data
+      </Step>
+      
+      <Step title="Request Export">
+        Click "Export data" (available for Pro/Max users)
+      </Step>
+      
+      <Step title="Download Transcripts">
+        Receive download link via email
+      </Step>
+      
+      <Step title="Import to Athena">
+        Copy transcript files to `.context/memories/imports/`:
+        
+        ```bash
+        cp -r ~/Downloads/Claude-Export/*.md .context/memories/imports/
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+  
+  <Tab title="Markdown Files">
+    ### Importing Arbitrary Markdown
+    
+    Any Markdown file can be imported:
+    
+    <Steps>
+      <Step title="Choose destination">
+        - **Personal memories**: `.context/memories/`
+        - **Project context**: `.context/projects/`
+        - **Research notes**: `.context/research/`
+      </Step>
+      
+      <Step title="Copy files">
+        ```bash
+        cp ~/notes/*.md .context/memories/imports/
+        ```
+      </Step>
+      
+      <Step title="Add frontmatter (optional)">
+        For better organization:
+        
+        ```yaml
+        ---
+        title: My Research Notes
+        created: 2026-01-15
+        tags: [research, ai, productivity]
+        ---
+        ```
+      </Step>
+    </Steps>
+  </Tab>
+</Tabs>
+
+---
+
+## Import Process
+
+### How It Works
+
+<Steps>
+  <Step title="File Placement">
+    Copy files to `.context/memories/imports/` or any subdirectory under `.context/`
+  </Step>
+  
+  <Step title="Session Boot">
+    Run `/start` to trigger the boot orchestrator
+  </Step>
+  
+  <Step title="Automatic Indexing">
+    Athena detects new/changed files and:
+    - Generates vector embeddings (for semantic search)
+    - Extracts tags (for TAG_INDEX)
+    - Updates metadata
+  </Step>
+  
+  <Step title="Verification">
+    Verify files were detected:
+    
+    ```bash
+    athena check
+    ```
+  </Step>
+</Steps>
+
+---
+
+## Directory Structure
+
+Organize imported content logically:
+
+```text
+.context/
+├── memories/
+│   ├── imports/          ← Drop zone for new imports
+│   ├── chatgpt/          ← ChatGPT conversations
+│   ├── gemini/           ← Gemini chats
+│   └── claude/           ← Claude transcripts
+├── projects/             ← Project-specific context
+├── research/             ← Research notes and papers
+└── archives/             ← Historical data
+```
+
+---
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Clean before import" icon="broom">
+    Remove timestamps, system messages, and formatting artifacts. Only import meaningful content.
+  </Card>
+  
+  <Card title="Add tags" icon="tag">
+    Use `#hashtags` in imported files for better TAG_INDEX coverage.
+  </Card>
+  
+  <Card title="Batch by topic" icon="layer-group">
+    Group related conversations in subdirectories (e.g., `.context/memories/coding/`).
+  </Card>
+  
+  <Card title="Verify privacy" icon="lock">
+    Don't import files containing API keys, credentials, or sensitive personal data.
+  </Card>
+</CardGroup>
+
+---
+
+## Cleaning Imported Data
+
+<Tip>
+**For best results, clean up exported data before importing.** This improves search quality and reduces noise.
+</Tip>
+
+### What to Remove
+
+```markdown
+❌ System metadata:
+   "Assistant: I'm Claude, an AI assistant..."
+   "User ID: 12345"
+   
+❌ Timestamps:
+   "2024-01-15 14:23:45 UTC"
+   
+❌ Formatting artifacts:
+   "<div class='message'>..."
+   "[REDACTED]"
+   
+❌ Repetitive greetings:
+   "How can I help you today?"
+   "Is there anything else?"
+```
+
+### What to Keep
+
+```markdown
+✅ Core insights:
+   "The key difference between X and Y is..."
+   
+✅ Decisions made:
+   "We decided to use PostgreSQL because..."
+   
+✅ Code examples:
+   ```python
+   def process_data():
+       ...
+   ```
+   
+✅ Useful references:
+   "According to the docs at https://..."
+```
+
+---
+
+## Verification
+
+### Check Files Were Indexed
+
+After running `/start`, verify your imports:
+
+**Test Semantic Search**
+
+Test vector search finds your content:
+
+```bash
+python3 scripts/supabase_search.py "topic from imported file" --limit 5
+```
+
+You should see results from your imported files.
+
+**Check TAG_INDEX**
+
+Regenerate and check the index:
+
+```bash
+python3 scripts/generate_tag_index.py
+grep -i "#your-tag" .context/TAG_INDEX.md
+```
+
+**Run Athena Check**
+
+Run the diagnostic tool:
+
+```bash
+athena check
+```
+
+Look for:
+- Files detected: X new files
+- Embeddings generated: X files
+- Tags extracted: X tags
+
+---
+
+## Common Issues
+
+### "Files not detected on /start"
+
+**Cause**: Files not in `.context/` or ignored by `.gitignore`
+
+**Fix**:
+```bash
+# Check file location
+ls -la .context/memories/imports/
+
+# Check .gitignore doesn't exclude .md files
+grep -i "*.md" .gitignore
+```
+
+### "Search returns no results"
+
+**Cause**: Embeddings not generated or Supabase sync pending
+
+**Fix**:
+```bash
+# Force sync to Supabase
+python3 scripts/supabase_sync.py
+
+# Wait a few minutes for indexing
+# Then test search again
+```
+
+### "Tags not appearing in TAG_INDEX"
+
+**Cause**: Index not regenerated after import
+
+**Fix**:
+```bash
+python3 scripts/generate_tag_index.py
+```
+
+---
+
+## Advanced: Programmatic Import
+
+For large-scale imports, automate the process:
+
+```python
+#!/usr/bin/env python3
+import json
+import os
+from pathlib import Path
+
+def convert_chatgpt_export(json_path, output_dir):
+    """Convert ChatGPT export JSON to Markdown files."""
+    with open(json_path) as f:
+        data = json.load(f)
+    
+    output_dir = Path(output_dir)
+    output_dir.mkdir(parents=True, exist_ok=True)
+    
+    for conversation in data:
+        title = conversation.get('title', 'Untitled')
+        messages = conversation.get('mapping', {})
+        
+        # Convert to markdown
+        md_content = f"# {title}\n\n"
+        for msg_id, msg_data in messages.items():
+            msg = msg_data.get('message', {})
+            if msg:
+                role = msg.get('author', {}).get('role', '')
+                content = msg.get('content', {}).get('parts', [''])[0]
+                if content:
+                    md_content += f"## {role.capitalize()}\n\n{content}\n\n"
+        
+        # Write file
+        filename = f"{title.replace(' ', '-')[:50]}.md"
+        (output_dir / filename).write_text(md_content)
+
+if __name__ == '__main__':
+    import sys
+    convert_chatgpt_export(sys.argv[1], '.context/memories/imports/')
+```
+
+Usage:
+```bash
+python3 scripts/convert_chatgpt.py ~/Downloads/conversations.json
+```
+
+---
+
+## Security Considerations
+
+<Warning>
+**Never import files containing:**
+- API keys or credentials
+- `.env` files
+- Personal identifiable information (PII) you don't want searchable
+- Proprietary code or trade secrets (unless in a private repo)
+</Warning>
+
+### Privacy Filter
+
+Before importing to a public repo, run the privacy scanner:
+
+```bash
+python3 .github/scripts/privacy_scan.py FILE_TO_IMPORT
+```
+
+If it flags issues, scrub the content or keep it in your private workspace.
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Semantic Search" href="/guides/semantic-search" icon="magnifying-glass">
+    Learn how Athena retrieves your imported content using triple-path search
+  </Card>
+  
+  <Card title="Best Practices" href="/guides/best-practices" icon="star">
+    Operational discipline for maintaining your knowledge base
+  </Card>
+</CardGroup>

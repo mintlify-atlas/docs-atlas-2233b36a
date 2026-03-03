@@ -1,0 +1,143 @@
+---
+title: "CLI Overview"
+description: "Command-line interface for managing Athena workspaces and sessions"
+---
+
+The Athena CLI provides a complete toolkit for initializing workspaces, running diagnostics, and managing AI agent sessions from your terminal.
+
+## Installation
+
+Install Athena from the source repository:
+
+```bash
+pip install -e .
+```
+
+Verify the installation:
+
+```bash
+athena --version
+```
+
+## Quick Start
+
+Create your first Athena workspace:
+
+```bash
+# Initialize in current directory
+athena init .
+
+# Boot a session
+athena
+
+# Run health check
+athena check
+```
+
+## Available Commands
+
+<CardGroup cols={2}>
+  <Card title="athena" icon="rocket" href="#default-boot">
+    Boot a new AI agent session
+  </Card>
+  <Card title="athena init" icon="folder-plus" href="/cli/init">
+    Initialize workspace structure
+  </Card>
+  <Card title="athena check" icon="stethoscope" href="/cli/check">
+    Run basic health diagnostics
+  </Card>
+  <Card title="athena doctor" icon="user-doctor" href="/cli/doctor">
+    Run full system diagnostics (15 checks)
+  </Card>
+  <Card title="athena save" icon="floppy-disk" href="/cli/save">
+    Quicksave session checkpoint
+  </Card>
+</CardGroup>
+
+## Default Boot
+
+Running `athena` without arguments boots the orchestrator and starts a new session:
+
+```bash
+athena
+```
+
+**What it does:**
+1. Loads Core Identity from `.framework/modules/Core_Identity.md`
+2. Recalls context from the last session log
+3. Creates a new session log file
+4. Confirms ready status
+
+### Options
+
+<ParamField path="--version" type="flag">
+  Show version information and exit
+</ParamField>
+
+<ParamField path="--boot" type="flag">
+  Explicitly run the boot orchestrator (default behavior)
+</ParamField>
+
+<ParamField path="--end" type="flag">
+  Run the shutdown sequence (see [athena save](/cli/save))
+</ParamField>
+
+<ParamField path="--root" type="path">
+  Specify project root directory (auto-detected if not provided)
+</ParamField>
+
+## Global Flags
+
+These flags work with any command:
+
+```bash
+athena --version          # Show athena-cli version
+athena --help             # Show help information
+```
+
+## Session Workflow
+
+Typical session lifecycle:
+
+```bash
+# 1. Start session
+athena
+
+# 2. Work with your AI agent...
+
+# 3. Save checkpoints as needed
+athena save "Implemented user authentication"
+
+# 4. Close session
+athena --end
+```
+
+## Exit Codes
+
+| Code | Meaning |
+|:-----|:--------|
+| `0` | Success |
+| `1` | Failure or warnings detected |
+
+## Environment Variables
+
+Optional cloud features:
+
+- `SUPABASE_URL` - Supabase project URL (for memory sync)
+- `SUPABASE_ANON_KEY` - Supabase anonymous key
+- `ANTHROPIC_API_KEY` - Anthropic API key (for Claude integration)
+
+<Tip>
+  These environment variables are optional. Athena works fully offline without them.
+</Tip>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Initialize Workspace" icon="folder-tree" href="/cli/init">
+    Set up your first Athena workspace
+  </Card>
+  <Card title="Run Diagnostics" icon="magnifying-glass" href="/cli/doctor">
+    Check system health with 15 diagnostic tests
+  </Card>
+</CardGroup>

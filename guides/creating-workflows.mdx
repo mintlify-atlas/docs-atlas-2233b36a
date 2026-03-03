@@ -1,0 +1,334 @@
+---
+title: Creating Workflows
+description: Learn how to build custom slash-command workflows for automated task execution in Athena
+---
+
+Workflows are slash-command executable scripts stored in `.agent/workflows/`. They automate repetitive tasks and codify your operational procedures.
+
+## What is a Workflow?
+
+A workflow is a Markdown file that defines a sequence of steps for the AI agent to execute. When you type `/start`, `/end`, or `/research`, you're invoking a workflow.
+
+**Key characteristics:**
+- **Slash-invoked**: `filename.md` → `/filename` command
+- **Sequential execution**: Checklist-based steps
+- **Turbo-capable**: Steps can auto-run without approval
+- **Context-aware**: Can load additional files on demand
+
+---
+
+## Workflow Structure
+
+### 1. YAML Frontmatter (Required)
+
+Every workflow must start with YAML frontmatter:
+
+```yaml
+---
+description: Quick research on a topic using web and local sources
+created: 2026-01-01
+last_updated: 2026-02-15
+model: default
+temperature: 0.7
+tools:
+  read: true
+  write: true
+  bash: true
+  search: true
+---
+```
+
+**Field reference:**
+
+| Field | Required | Purpose |
+|:------|:---------|:--------|
+| `description` | ✅ | One-line summary shown in workflow listings |
+| `created` | Optional | Creation date (YYYY-MM-DD) |
+| `last_updated` | Optional | Last modification date |
+| `model` | Optional | Override default LLM (e.g., `claude-sonnet`) |
+| `temperature` | Optional | Sampling temperature (0.0–1.0) |
+| `tools` | Optional | Which tool categories the workflow uses |
+
+---
+
+### 2. Title & Latency Profile
+
+```markdown
+# /research — Execution Script
+
+> **Latency Profile**: MEDIUM
+> **Philosophy**: Depth > Speed. Exhaust local memory before hitting the web.
+```
+
+**Latency profiles:**
+- **ULTRA-LOW**: Less than 2K tokens (e.g., `/start`)
+- **LOW**: Approximately 2K tokens (e.g., `/end`)
+- **MEDIUM**: 5-10K tokens (e.g., `/research`)
+- **HIGH**: 20K+ tokens (e.g., `/ultrathink`)
+
+---
+
+### 3. Execution Steps (Checklist Format)
+
+Use markdown checklists for sequential steps:
+
+```markdown
+## Phase 1: Local Search
+
+// turbo
+
+- [ ] Run semantic search: `python3 scripts/smart_search.py "<query>" --limit 5`
+- [ ] Synthesize top results into a summary
+
+## Phase 2: Web Search
+
+- [ ] Search the web for supplementary sources
+- [ ] Cross-reference with local findings
+
+## Phase 3: Output
+
+- [ ] Deliver structured report with citations
+- [ ] Quicksave the research summary
+```
+
+**Turbo annotations:**
+
+| Annotation | Scope | Behavior |
+|:-----------|:------|:---------|
+| `// turbo` | Immediately following steps | Those steps auto-run without approval |
+| `// turbo-all` | Anywhere in workflow | ALL steps auto-run |
+
+<Warning>
+**Never use `// turbo` for destructive actions** like deleting files, pushing to production, or spending money.
+</Warning>
+
+---
+
+## Step-by-Step: Building Your First Workflow
+
+<Steps>
+  <Step title="Choose a use case">
+    Identify a repetitive task you perform often. Examples:
+    - Generating status reports
+    - Running test suites
+    - Deploying to staging
+    - Conducting research
+  </Step>
+  
+  <Step title="Create the workflow file">
+    Create a new file in `.agent/workflows/` with a descriptive name:
+    
+    ```bash
+    touch .agent/workflows/deploy.md
+    ```
+    
+    The filename becomes your slash command: `deploy.md` → `/deploy`
+  </Step>
+  
+  <Step title="Add YAML frontmatter">
+    Start your file with frontmatter:
+    
+    ```yaml
+    ---
+    description: Deploy application to staging environment
+    created: 2026-03-01
+    tools:
+      bash: true
+      read: true
+    ---
+    ```
+  </Step>
+  
+  <Step title="Define the workflow structure">
+    Add title, latency profile, and philosophy:
+    
+    ```markdown
+    # /deploy — Execution Script
+    
+    > **Latency Profile**: MEDIUM
+    > **Philosophy**: Safety first. Always verify before pushing.
+    ```
+  </Step>
+  
+  <Step title="Break down into phases">
+    Organize your steps into logical phases:
+    
+    ```markdown
+    ## Phase 1: Pre-deployment Checks
+    
+    - [ ] Run test suite: `npm test`
+    - [ ] Check for uncommitted changes: `git status`
+    - [ ] Verify environment variables are set
+    
+    ## Phase 2: Build & Deploy
+    
+    // turbo
+    
+    - [ ] Build production bundle: `npm run build`
+    - [ ] Deploy to staging: `./scripts/deploy-staging.sh`
+    
+    ## Phase 3: Verification
+    
+    - [ ] Run smoke tests on staging
+    - [ ] Log deployment to session
+    ```
+  </Step>
+  
+  <Step title="Add usage documentation">
+    Help future users understand when to use this workflow:
+    
+    ```markdown
+    ## Use Cases
+    
+    - Deploy to staging for client review
+    - Test deployment process before production
+    - Quick iteration during development sprints
+    
+    ## Output Format
+    
+    Prints deployment URL and smoke test results.
+    ```
+  </Step>
+  
+  <Step title="Tag for indexing">
+    End with tags for searchability:
+    
+    ```markdown
+    ## Tagging
+    
+    #workflow #deployment #automation
+    ```
+  </Step>
+</Steps>
+
+---
+
+## Real-World Examples
+
+### Example 1: Session Start Workflow
+
+From `/start`:
+
+```markdown
+## Phase 1: Instant Boot (~2K tokens)
+
+// turbo
+
+- [ ] Load Core Identity
+- [ ] Load userContext.md — Core profile, constraints
+- [ ] Load productContext.md — Mission, philosophy
+- [ ] Load activeContext.md — Current focus
+- [ ] Run boot orchestrator: `python3 .agent/scripts/boot.py`
+
+**Confirm**: "⚡ Ready. (Session started.)"
+```
+
+### Example 2: Research Workflow
+
+```markdown
+## Phase 1: Local Search
+
+// turbo
+
+- [ ] Run semantic search: `python3 scripts/smart_search.py "<query>" --limit 5`
+- [ ] Check TAG_INDEX for relevant entities
+- [ ] Grep for exact keyword matches
+
+## Phase 2: Synthesis
+
+- [ ] Combine results from all three search paths
+- [ ] Generate structured report with citations
+- [ ] Highlight knowledge gaps
+```
+
+---
+
+## Advanced Patterns
+
+### Conditional Execution
+
+Workflows can include conditional logic:
+
+```markdown
+## Phase 2: Deployment
+
+- [ ] Check environment: `echo $DEPLOY_ENV`
+- [ ] **If staging**: Run `./deploy-staging.sh`
+- [ ] **If production**: Require manual confirmation, then `./deploy-prod.sh`
+```
+
+### Adaptive Loading
+
+Load additional context only when needed:
+
+```markdown
+## Phase 2: Adaptive Loading (On-Demand)
+
+| Trigger | File | Tokens |
+|---------|------|--------|
+| Tag lookup, "find files about" | `TAG_INDEX.md` | 5,500 |
+| Protocol/skill request | `SKILL_INDEX.md` | 4,500 |
+| "who am I" | `User_Profile_Core.md` | 1,500 |
+```
+
+### Skill Weaving
+
+Auto-inject skills when context matches:
+
+```markdown
+## Phase 3: Contextual Skill Weaving
+
+| Context / Topic | Skill to Inject |
+|-----------------|------------------|
+| Frontend, UI, Design | `Skill_Frontend_Design.md` |
+| Deep Research | `Protocol 52: Deep Research Loop` |
+| Complex Reasoning | `Protocol 75: Synthetic Parallel Reasoning` |
+```
+
+---
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Keep it focused" icon="bullseye">
+    One workflow = one job. If you can't describe it in one sentence, it's probably two workflows.
+  </Card>
+  
+  <Card title="Make steps atomic" icon="atom">
+    Each step should be independently verifiable. Avoid compound steps like "Build and deploy and test."
+  </Card>
+  
+  <Card title="Use turbo wisely" icon="bolt">
+    Only auto-run safe, idempotent operations. When in doubt, require confirmation.
+  </Card>
+  
+  <Card title="Document assumptions" icon="book">
+    State prerequisites clearly. What tools must be installed? What files must exist?
+  </Card>
+</CardGroup>
+
+---
+
+## Common Pitfalls
+
+| ❌ Don't | ✅ Do Instead |
+|:---------|:-------------|
+| Skip YAML frontmatter | Always include at minimum `description` |
+| Use generic names (`script.md`) | Use descriptive names (`deploy-staging.md`) |
+| Turbo-enable destructive actions | Require confirmation for risky operations |
+| Cram multiple jobs into one workflow | Create separate workflows for distinct tasks |
+| Forget to tag | Always end with `#workflow` + topic tags |
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Writing Protocols" href="/guides/writing-protocols" icon="file-code">
+    Learn how to create reusable decision-making protocols
+  </Card>
+  
+  <Card title="Best Practices" href="/guides/best-practices" icon="star">
+    Operational discipline for running Athena sustainably
+  </Card>
+</CardGroup>

@@ -1,0 +1,297 @@
+---
+title: Work & Projects
+description: Switch between multiple client projects, prepare for meetings, and maintain cross-team knowledge without losing context.
+---
+
+Athena transforms how you manage professional work by maintaining **persistent context across all your projects**. No more re-explaining your role, your clients, or your constraints every time you switch tasks.
+
+## The Problem with Traditional Tools
+
+<CardGroup cols={2}>
+  <Card title="Context Switching Tax" icon="arrows-rotate">
+    You spend the first 10 minutes of every task re-explaining the background to ChatGPT, Claude, or Gemini.
+  </Card>
+  
+  <Card title="Lost Decisions" icon="box-archive">
+    That architecture discussion from 3 weeks ago? Gone. You can't remember which chat it was in.
+  </Card>
+  
+  <Card title="Siloed Knowledge" icon="building-lock">
+    Client A's context doesn't inform Client B's work, even when the patterns are identical.
+  </Card>
+  
+  <Card title="Platform Lock-In" icon="lock">
+    Switch from ChatGPT to Claude? Start over. Every new model means rebuilding your context.
+  </Card>
+</CardGroup>
+
+## How Athena Solves This
+
+### Multi-Project Context Management
+
+<Steps>
+  <Step title="Initial Setup (Session 1-5)">
+    Tell Athena about your clients, projects, and role:
+    
+    ```text
+    I'm a consultant working with 3 clients:
+    - Client A: E-commerce platform migration (React → Next.js)
+    - Client B: API security audit (financial sector)
+    - Client C: Team training on AI tools
+    ```
+  </Step>
+  
+  <Step title="Work Sessions (Ongoing)">
+    Just mention the client name:
+    
+    ```text
+    "Let's work on Client A's checkout flow"
+    ```
+    
+    The AI loads: tech stack, constraints, previous decisions, coding standards.
+  </Step>
+  
+  <Step title="Cross-Project Learning">
+    After 50+ sessions, the AI recognizes patterns:
+    
+    ```text
+    AI: "This is similar to the auth pattern we used for Client B.
+         Want me to adapt it with their error handling approach?"
+    ```
+  </Step>
+</Steps>
+
+### Meeting Preparation
+
+<Accordion title="Before the Meeting">
+  **Typical workflow:**
+  
+  ```text
+  You: "I have a strategy call with Client A's CTO tomorrow.
+        Prepare a brief on project status."
+  
+  AI: [Scans session history, extracts:
+       - Completed milestones
+       - Open blockers
+       - Upcoming decisions
+       - Risk areas]
+  ```
+  
+  **Result:** 5-minute brief generated from 20 sessions of context.
+</Accordion>
+
+<Accordion title="After the Meeting">
+  **Memory capture:**
+  
+  ```text
+  You: "Meeting notes: CTO approved the caching strategy,
+        wants security review by end of month, budget increase
+        approved for performance testing."
+  
+  AI: "Filed under Client A > Decisions. Updated timeline,
+       flagged security review deadline, noted budget change.
+       Want me to draft the testing plan?"
+  ```
+  
+  **Result:** Context persists across all future Client A sessions.
+</Accordion>
+
+## Real-World Workflows
+
+### Shift Scheduling (Healthcare, Retail, Hospitality)
+
+<CodeGroup>
+```text Initial Context
+You: I work 4 on, 3 off rotating shifts at a hospital.
+     12-hour days, alternating weeks between day/night.
+     I need help tracking my schedule and managing energy.
+
+AI: Got it. When's your next rotation start?
+```
+
+```text After 10 Sessions
+You: I'm exhausted today.
+
+AI: You're on day 3 of a night shift rotation.
+     Last time you felt this way on day 3, we adjusted
+     your meal timing and it helped. Want to try that?
+```
+</CodeGroup>
+
+<Info>
+**The AI learns your patterns** — when you're productive, when you need rest, how shift changes affect your energy.
+</Info>
+
+### Cross-Team Knowledge Management
+
+<CardGroup cols={2}>
+  <Card title="Team Onboarding" icon="users">
+    New team member asks a question you've answered before?
+    
+    Search your session history: `/search onboarding API authentication`
+    
+    Pull the exact explanation you gave last time, adapted for the new context.
+  </Card>
+  
+  <Card title="Documentation Synthesis" icon="book">
+    After 100 sessions answering team questions:
+    
+    "Compile all authentication-related discussions into a team wiki page."
+    
+    The AI generates documentation from your actual conversations.
+  </Card>
+</CardGroup>
+
+### Code Review & Standards
+
+<Accordion title="Establishing Standards (Sessions 1-20)">
+  As you review code and make decisions:
+  
+  ```text
+  You: "We should always validate user input at the API boundary,
+        not in the service layer."
+  
+  AI: "Noted as a coding standard. Should I flag violations
+       when we review code?"
+  ```
+  
+  After 20 sessions, the AI knows your team's conventions.
+</Accordion>
+
+<Accordion title="Applying Standards (Sessions 20+)">
+  During code review:
+  
+  ```text
+  AI: "This validation is in the service layer.
+       Per our standard from Session 12, it should be
+       at the API boundary. Want me to refactor?"
+  ```
+  
+  The AI becomes your standards enforcer.
+</Accordion>
+
+## Strategic Planning
+
+### Long-Term Project Planning
+
+<Steps>
+  <Step title="Initial Vision (Session 1)">
+    ```text
+    You: "We're building a content management system.
+          Target launch: 6 months. Team of 4."
+    ```
+  </Step>
+  
+  <Step title="Milestone Tracking (Sessions 10-50)">
+    ```text
+    Session 10: "MVP scope finalized"
+    Session 25: "Auth system complete"
+    Session 40: "Beta testing started"
+    ```
+  </Step>
+  
+  <Step title="Retrospective Analysis (Session 50+)">
+    ```text
+    You: "What did we underestimate in this project?"
+    
+    AI: "Auth took 3x longer than planned (Session 15-25).
+         Originally estimated 1 week, took 3.
+         Root cause: OAuth complexity."
+    ```
+  </Step>
+</Steps>
+
+<Tip>
+**Future Planning Gets Smarter**
+
+By session 100, when planning a new project: "Based on the CMS project, OAuth integration should be allocated 3 weeks, not 1."
+</Tip>
+
+### Budget & Resource Modeling
+
+<CodeGroup>
+```text Session 1: Budget Constraints
+You: "Client A's budget is $50k, Client B's is $120k.
+      I bill at $150/hr."
+```
+
+```text Session 30: Proactive Alerts
+AI: "Client A has 40 hours remaining (~$6k).
+     Based on our velocity, that's 2 weeks.
+     Current scope will take 3 weeks.
+     Need to reduce scope or request increase?"
+```
+</CodeGroup>
+
+## Multi-Model Advantage
+
+<Note>
+One of Athena's core strengths: **switch models without losing context**.
+</Note>
+
+### Typical Workflow
+
+| Task | Model | Why |
+|:-----|:------|:----|
+| **Strategy Planning** | Claude Opus | Long-context reasoning |
+| **Code Generation** | GPT-5.3 | Fast, precise |
+| **Research Synthesis** | Gemini 3.1 Pro | Multi-source analysis |
+| **Budget Analysis** | Claude | Structured data handling |
+
+**The memory stays the same.** The model is just whoever's on shift.
+
+## Practical Tips
+
+<Warning>
+**Don't Overthink Initial Setup**
+
+You don't need to "configure" Athena for work. Just start working and talking. By session 20, the AI will have learned your structure organically.
+</Warning>
+
+<Tip>
+**Use Natural Timestamps**
+
+"Last Tuesday's client call" works better than trying to maintain formal meeting logs. The AI correlates timestamps with session history.
+</Tip>
+
+<Tip>
+**Trust the Search**
+
+Can't remember which session you discussed the caching strategy? 
+
+`/search caching strategy Client A`
+
+Semantic search finds it even if you don't remember exact wording.
+</Tip>
+
+## Key Outcomes
+
+<CardGroup cols={2}>
+  <Card title="Zero Context Switching" icon="gauge-high">
+    Say "Client A" and the AI loads 50 sessions of context instantly.
+  </Card>
+  
+  <Card title="Decision History" icon="timeline">
+    "Why did we choose PostgreSQL over MongoDB?" → Answer from Session 8.
+  </Card>
+  
+  <Card title="Pattern Recognition" icon="brain">
+    "This looks like the API pattern from Client B" — cross-project learning.
+  </Card>
+  
+  <Card title="Predictable Estimates" icon="chart-line">
+    "Auth takes us 3 weeks on average" — learned from project history.
+  </Card>
+</CardGroup>
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Research Workflows" icon="microscope" href="/use-cases/research">
+    Apply persistent memory to research and synthesis
+  </Card>
+  
+  <Card title="Decision-Making" icon="scale-balanced" href="/use-cases/decision-making">
+    Use accumulated context for strategic decisions
+  </Card>
+</CardGroup>

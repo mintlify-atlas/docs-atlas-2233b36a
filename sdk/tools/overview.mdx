@@ -1,0 +1,106 @@
+---
+title: SDK Tools Overview
+description: Command-line tools and utilities for search, indexing, and monitoring in the Athena SDK
+---
+
+The Athena SDK includes a suite of command-line tools for search orchestration, automatic indexing, and system monitoring.
+
+## Available Tools
+
+### Search Tools
+
+- **[Hybrid Search](/sdk/tools/search)** - RRF-based multi-source search orchestrator
+- **[Agentic Search](/sdk/tools/agentic-search)** - Multi-step query decomposition with parallel retrieval
+
+### System Tools
+
+- **[Heartbeat](/sdk/tools/heartbeat)** - Auto-indexing file watcher daemon
+
+## Core Features
+
+### Parallel Execution
+
+All tools use `ThreadPoolExecutor` for concurrent operations:
+
+```python
+from concurrent.futures import ThreadPoolExecutor
+
+with ThreadPoolExecutor(max_workers=8) as executor:
+    futures = [executor.submit(task) for task in tasks]
+    results = [f.result() for f in futures]
+```
+
+### Caching
+
+Search results are cached both exactly (by query string) and semantically (by embedding similarity):
+
+```python
+from athena.core.cache import get_search_cache
+
+cache = get_search_cache()
+cache.set(query, results, embedding=query_embedding)
+```
+
+### Debouncing
+
+File system events are debounced to prevent redundant syncs during rapid edits (5-second window).
+
+## Architecture
+
+### Search Pipeline
+
+1. **Collection** - Gather candidates from multiple sources in parallel
+2. **Fusion** - Weighted Reciprocal Rank Fusion (RRF) to combine rankings
+3. **Reranking** (optional) - Semantic reranking with cross-encoder models
+4. **Validation** - Filter by confidence thresholds
+
+### Data Sources
+
+The tools integrate with:
+
+- **Supabase** - Vector embeddings and structured data
+- **SQLite** - Local file index and tags
+- **GraphRAG** - Knowledge graph entities and communities
+- **File System** - Direct file content search
+
+## Configuration
+
+All tools read from `athena.core.config`:
+
+```python
+from athena.core.config import (
+    PROJECT_ROOT,
+    TAG_INDEX_PATH,
+    CANONICAL_PATH,
+    CORE_DIRS,
+)
+```
+
+## CLI Usage
+
+All tools can be invoked via the `athena` command:
+
+```bash
+# Hybrid search
+python -m athena.tools.search "trading psychology"
+
+# Agentic search
+python -m athena.tools.agentic_search "risk management and position sizing"
+
+# Start heartbeat daemon
+python -m athena.tools.heartbeat
+```
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Hybrid Search" icon="magnifying-glass" href="/sdk/tools/search">
+    Multi-source search with RRF fusion
+  </Card>
+  <Card title="Agentic Search" icon="brain" href="/sdk/tools/agentic-search">
+    Query decomposition and validation
+  </Card>
+  <Card title="Heartbeat" icon="heart-pulse" href="/sdk/tools/heartbeat">
+    Auto-indexing file watcher
+  </Card>
+</CardGroup>

@@ -1,0 +1,180 @@
+---
+title: "/research - Exhaustive Investigation"
+description: "Ultra-deep research mode with 5-10+ searches, full source analysis, and multi-level rabbit holes"
+---
+
+# /research — Exhaustive Investigation
+
+The `/research` workflow activates maximum-depth investigation mode. This is NOT a quick lookup — it's exhaustive, multi-source research that follows rabbit holes 3+ levels deep.
+
+## When to Use
+
+- Market research (competitors, industries)
+- Regulatory deep-dives (MAS, legal frameworks)
+- Academic literature surveys
+- Due diligence investigations
+- Complex multi-stakeholder problems
+- Anything where surface answers are insufficient
+
+## Behavior
+
+When `/research` is invoked, Athena goes maximum depth:
+
+### Depth Levels (All Mandatory)
+
+**Layer 1: Initial Survey** (5-10 searches)
+- Run 5-10 related web searches covering different angles
+- Include: definitions, recent news, academic sources, industry sources, contrarian views
+- Save all source URLs for citation
+
+**Layer 2: Source Deep-Dive** (Read top sources)
+- Use `read_url_content` on the 5-10 most promising sources
+- Extract key claims, data points, quotes
+- Flag contradictions between sources
+
+**Layer 3: Follow the Rabbit Hole**
+- Identify references/links within sources
+- Follow 2-3 levels of secondary references
+- Surface information the initial searches missed
+
+**Layer 4: Cross-Domain Synthesis**
+- Connect findings across different domains (legal, economic, psychological, technical)
+- Identify isomorphic patterns
+- Map stakeholder incentives
+
+**Layer 5: Adversarial Stress-Test**
+- Steelman the opposing view
+- What would a critic say about these findings?
+- What's missing? What's the blind spot?
+
+**Layer 6: Actionable Distillation**
+- Compress findings into decision-relevant format
+- Clear recommendations with confidence levels
+- Deposit key insights to Codex
+
+## Output Format
+
+Every research output includes these mandatory sections:
+
+```markdown
+## Research Target
+[What we're investigating]
+
+## Executive Summary
+[3-5 bullet points of key findings]
+
+## Source Inventory
+| # | Source | Type | Key Claim | Confidence |
+|---|--------|------|-----------|------------|
+| 1 | [URL]  | [Academic/News/Industry/Gov] | [Claim] | [H/M/L] |
+...
+
+## Deep Analysis
+[Full analysis with all phases]
+
+## Contradictions & Gaps
+[Where sources disagree, what's unknown]
+
+## Rabbit Hole Findings
+[Secondary/tertiary sources discovered]
+
+## Actionable Recommendations
+[What to DO with this information]
+
+## Codex Deposit
+[What should be saved permanently]
+```
+
+## Guardrails
+
+- **Minimum searches**: 5 (no less)
+- **Minimum sources read**: 3 full articles
+- **Maximum time**: No limit (go as deep as needed)
+- **Citation density**: Every factual claim cited
+- **Contradiction flagging**: Mandatory
+
+## Usage Example
+
+```
+User: /research What are the viable AI-powered trading education business models in SEA?
+
+Athena:
+[Runs 8 searches: competitors, regulations, pricing models, customer segments,
+tech stack, failure cases, success cases, adjacent industries]
+→ Reads 6 full articles
+→ Follows 4 secondary references
+→ Synthesizes into full analysis
+→ Deposits key findings to Codex
+
+## Research Target
+AI-powered trading education business models in Southeast Asia
+
+## Executive Summary
+- Market size: $2.1B SEA fintech education (2024), 18% CAGR
+- Regulatory: MAS requires licensing for financial advice (not education)
+- Top models: SaaS subscription (65%), freemium (25%), B2B2C (10%)
+- Key competitors: StashAway Learn (free), FSMOne Academy (hybrid)
+- Risk: Differentiation challenge in crowded market
+
+[... continues with full analysis ...]
+```
+
+## Triple Crown Mode (DEFCON 1)
+
+For maximum-stakes research, combine all three power modes:
+
+```
+/think /search /research
+```
+
+This activates **Nuclear Research Mode**:
+- 10-20+ exhaustive searches
+- Deep-read 5-10 full articles
+- Follow rabbit holes 3+ levels
+- Full Phase 0-VII analysis on synthesized findings
+- Adversarial stress-test (steelman + red-team)
+- Confrontation phase on conclusions
+- Permanent deposit to Codex
+- Multi-iteration refinement if gaps found
+
+Expect extended response time and high token usage, but **maximum information density**.
+
+**Use Case**: Life-altering decisions, major financial moves, complex multi-stakeholder problems, when "I need to know EVERYTHING before I act."
+
+## Anti-Patterns (Lies of Omission Prevention)
+
+Each model has access to a subset of sources — any one will leave out information. To prevent this:
+
+### Pre-Search Checklist
+
+1. **Broad First, Narrow Later**
+   - ❌ "Find A21 LED bulbs with 15,000+ lumens" ← Too specific, misses variants
+   - ✅ "Survey high-lumen LED bulbs, then filter" ← Catches edge cases
+
+2. **Generate Prompt → Refine → Execute**
+   - Before running 5-10 searches, first draft the research plan
+   - Ask: "What angles might I miss?"
+   - Then execute the refined plan
+
+3. **Date Range Awareness**
+   - ❌ "Only 2025 releases" ← Misses Dec 2024 that's still relevant
+   - ✅ "Most recent as of [date]" ← Captures boundary cases
+
+4. **Multi-Source Triangulation**
+   - If high-stakes: run parallel queries on multiple search engines
+   - Compare what each surface vs. omits
+   - Synthesize across sources
+
+## Comparison
+
+| Mode | Searches | Sources Read | Depth | Phases | Time |
+|------|----------|--------------|-------|--------|------|
+| `/search` | 2-3 | 0-2 | Medium | Optional | Fast |
+| `/think` | 0-1 | 0 | High (reasoning) | All | Medium |
+| `/research` | 5-10+ | 3-10+ | Maximum | All + Rabbit Hole | Extended |
+
+## Related Workflows
+
+- [/search](/workflows/all-workflows) - Medium-depth web search
+- [/think](/workflows/think) - Deep reasoning without web research
+- [All Workflows](/workflows/all-workflows) - Complete workflow reference

@@ -1,0 +1,315 @@
+---
+title: "Changelog"
+description: "Detailed release notes and version history for Project Athena from v1.0 through v9.3.1"
+---
+
+> **Last Updated**: 03 March 2026
+
+This document provides detailed release notes. For the brief summary, see the README changelog.
+
+<Note>
+Versions v1.0–v1.6 predate the v8.x versioning scheme adopted in January 2026. The version jump reflects a complete architectural rewrite, not skipped releases.
+</Note>
+
+---
+
+## v9.3.1 (03 March 2026)
+
+**Cross-Model Audit Fixes**: Resolved 4 missing GitHub releases (v9.2.7–v9.3.0), corrected stale file count claims, relocated Windows compatibility section, synced dates.
+
+### Key Changes
+
+- **File Count Correction** (`README.md`): Updated "370+ Markdown" → "350+" (actual: 354) and "230+ Python scripts" → "600+" (actual: 651). Counts drifted after v9.2.9 dead-skill pruning.
+- **Windows Section Relocation** (`README.md`): Moved dangling `## Windows Compatibility` from below the footer into a collapsible `<details>` block under Quickstart.
+- **GitHub Release Sync**: Created v9.3.1 release covering v9.2.7–v9.3.0 changelog summaries.
+- **Date Sync**: Updated README and CHANGELOG dates to 03 March 2026.
+
+---
+
+## v9.3.0 (02 March 2026)
+
+**Onboarding Friction Audit**: Restructured dependencies, added virtual environment instructions, and fixed 6 onboarding blockers for new users.
+
+### Key Changes
+
+- **Dependency Restructuring** (`pyproject.toml`): Moved `torch`, `sentence-transformers`, `flashrank`, `dspy-ai`, `anthropic`, `supabase`, `google-generativeai` from core dependencies to optional groups (`[search]`, `[cloud]`, `[full]`). Default `pip install -e .` now completes in ~30s without downloading 2GB of PyTorch.
+- **Virtual Environment Instructions** (`README.md`, `GETTING_STARTED.md`, `FAQ.md`): Added explicit `python3 -m venv .venv` step to Quickstart. Prevents PEP 668 `externally-managed-environment` errors on macOS Homebrew and Ubuntu 23.04+.
+- **Two-Tier Install Path** (`README.md`): Lightweight install (default) vs `pip install -e ".[full]"` (vector search + reranking).
+- **PEP 668 Troubleshooting** (`FAQ.md`): New troubleshooting entry for the most common install blocker.
+- **Stale Path Fix** (`examples/workflows/start.md`): Replaced hardcoded `file:///Users/[AUTHOR]/...` absolute paths with relative paths.
+- **URL Fix** (`init.py`): Fixed `[AUTHOR]87` placeholder in init output URL.
+- **`requirements-lite.txt`** (NEW): Minimal dependency file for users who want the core framework without ML deps.
+
+### Verification
+
+| Metric | Result |
+|--------|--------|
+| Core install deps | 5 (was 11) ✅ |
+| Install time (default) | ~30s (was 5-10 min) ✅ |
+| PEP 668 addressed | 3 docs ✅ |
+| Stale paths fixed | 3 ✅ |
+
+---
+
+## v9.2.9 (02 March 2026)
+
+**Ultrathink v4.1 HITL Bypass + Micro-Pruning**: Added Human-in-the-Loop manual execution path to `/ultrathink`, pruned 10% dead skills for 100% cognitive cluster coverage, and fixed all broken references.
+
+### Key Changes
+
+- **Ultrathink v4.1**: Added Option B (HITL Manual Sandbox) — users can execute the 4 parallel reasoning tracks directly in the Gemini UI at zero API cost, then paste outputs back.
+- **Micro-Pruning**: Removed `ui-ux-pro-max/` workflow (skill deleted from private repo). Fixed broken `file://` path in `refactor-code.md`.
+- **`generate_skill_index.py`**: Removed dead `sickn33_collection` vendor block (referencing deleted submodule).
+- **Cognitive Cluster Coverage**: Updated from 19/21 (90%) to 19/19 (100%) — all orphan skills eliminated.
+- **Orchestrator v4.1**: Top-level imports, modern type hints (`dict`/`list`/`tuple`), rate-limit retry with 30s backoff, async deadlock fix.
+
+### Verification
+
+| Metric | Result |
+|--------|--------|
+| Broken references fixed | 4 ✅ |
+| Security scans passed | 3/3 ✅ |
+| Cluster coverage | 100% ✅ |
+| Lines removed (net) | -4,192 ✅ |
+
+---
+
+## v9.2.8 (27 February 2026)
+
+**Skill Template Expansion**: Added 5 starter skill templates across 4 categories for new Antigravity users. Skills are copy-paste ready — `cp -r examples/skills/<skill> .agent/skills/`.
+
+### New Skills
+
+| Path | Description |
+|------|-------------|
+| `examples/skills/coding/spec-driven-dev/` | Build a design spec before writing code |
+| `examples/skills/research/deep-research-loop/` | Structured multi-source research workflow |
+| `examples/skills/quality/red-team-review/` | Adversarial QA review for any artifact |
+| `examples/skills/decision/mcda-solver/` | Multi-criteria decision matrix calculator |
+| `examples/skills/workflow/context-compactor/` | Compress context to stay within token limits |
+
+### Other Changes
+
+- **`examples/skills/README.md`**: Rewritten with full directory tree, AG Quick Start instructions, and skill creation guide.
+
+---
+
+## v9.2.7 (26 February 2026)
+
+**Risk-Proportional Triple-Lock + Tier 0 Context Summaries**: Engineered the min-latency × max-effectiveness optimization. The Triple-Lock is no longer a flat tax on every query — it's now risk-proportional with three tiers. Boot sequence gains zero-cost context pre-computation.
+
+### Key Changes
+
+- **Risk-Proportional Triple-Lock** (`governance.py`): Added `RiskLevel` enum (SNIPER / STANDARD / ULTRA). SNIPER queries (Λ < 10) bypass mandatory search — direct answer. STANDARD/ULTRA enforce full Triple-Lock. Default is STANDARD (robustness bias: `cost(false_negative) >> cost(false_positive)`). Risk level auto-resets after each verification.
+- **Tier 0 Context Summaries** (`context_summaries.py`, NEW): Pre-computes 500-char compressed summaries of all 6 Memory Bank files at boot. Uses hash-based delta detection — only regenerates when source changes. Cached to `.agent/state/context_cache/`. Zero API cost.
+- **Boot Orchestrator** (`orchestrator.py`): Context summary generation integrated as parallel worker #7 in the ThreadPoolExecutor. Zero sequential boot latency added.
+- **REFERENCES.md**: Added 3 new academic citations (Shannon, Satisficing, Antifragility).
+- **README**: Updated tech stack routing description to "Risk-Proportional Triple-Lock".
+
+### Design Principles (Three Laws)
+
+1. **Measure latency over the full cycle, not per-response.** Rework is the real latency tax.
+2. **Phase-separate classification from execution.** Fast routing, robust processing. Never blend.
+3. **When the classifier is uncertain, always round toward robustness.** The cost asymmetry makes this the only rational default.
+
+### Verification
+
+| Metric | Result |
+|--------|--------|
+| Governance SNIPER bypass | Verified ✅ |
+| SNIPER auto-reset to STANDARD | Verified ✅ |
+| STANDARD/ULTRA enforcement | Verified ✅ |
+| Context summaries (6/6 files) | Pre-computed ✅ |
+| Cache retrieval | Functional ✅ |
+| All new code | Lint-clean ✅ |
+
+---
+
+## v9.2.6 (25 February 2026)
+
+**Kilo Code + Roo Code IDE Integration**: Expanded agent compatibility to include Kilo Code and Roo Code. Fixed Windows encoding issue.
+
+### Key Changes
+
+- **IDE Support**: Added `athena init --ide kilocode` and `athena init --ide roocode` commands.
+- **`COMPATIBLE_IDES.md`**: New documentation page listing all supported IDEs with setup instructions.
+- **Windows Encoding Fix**: Resolved UTF-8 encoding issue on Windows platforms.
+- **Issue #19**: Closed (IDE compatibility question).
+
+---
+
+## v9.2.5 (24 February 2026)
+
+**Life Integration Protocol Stack + Formal Proof Standard**: Extended the reasoning pipeline from domain-specific rigor to domain-general life integration. New protocols for cross-domain constraint propagation, personalized learning, and emotional auditing.
+
+### Key Changes
+
+- **Protocol 381 (Formal Proof Standard)**: New — 6 rules for mathematical proofs and mechanism design (Derive Never Assert, Steelman Alternatives, Numerical Examples, Scope Boundaries, Adversarial Robustness, Dynamic Extensions).
+- **Protocol 382 (Cross-Domain Constraint Propagation)**: New — prevents domain-siloed advice by auto-surfacing time/energy/money conflicts across life domains.
+- **Protocol 383 (Personalized Learning Acquisition)**: New — 90-day outcome mapping, spaced repetition scaffolding, plateau detection.
+- **Protocol 000 Extended (8-Step Audit Loop)**: Added Step 0.3 (Emotional Audit), Step 0.5 (Assumption Register), Step 1.5 (Stakeholder Map), Step 3.7 (Sensitivity Sweep), and "Depth over Checkbox" quality rule.
+- **Core Identity §0.4 Expanded**: Added Post-Generation Self-Audit (9-item checklist, Λ > 60) and Life-Domain Protocol Trigger Map (10 autonomic triggers).
+- **`/review` Workflow**: New weekly integration review — cross-domain health check, constraint conflict detection, decision triage.
+
+### Verification
+
+| Metric | Result |
+|--------|--------|
+| Protocol 000 steps | 4 → 8 ✅ |
+| New protocols created | 3 (381, 382, 383) ✅ |
+| Trigger map coverage | 10 life-domain rules ✅ |
+| Benchmark proof (Alderia v2.1) | 87/100 (Red-Team verified) ✅ |
+
+---
+
+## v9.2.3 (21 February 2026)
+
+**Multi-Agent Safety Hardening + Issue Deflection**: Integrated architectural patterns from Claude Code and OpenClaw audits. Added self-service support gates.
+
+### Key Changes
+
+- **Protocol 413 v1.1**: Added Unrecognized File Handling, Lint/Format Auto-Resolution, and Focus Discipline sections (sourced from OpenClaw).
+- **AGENTS.md**: Added Multi-Agent Safety section to both root and Athena-Public. Updated pattern source attribution.
+- **CLAUDE.md Symlinks**: Created `CLAUDE.md -> AGENTS.md` symlinks for cross-IDE agent compatibility.
+- **SUPPORT.md**: New self-service support file — "Ask Athena First" philosophy.
+- **Issue Templates**: All 3 templates (bug, question, feature) updated with Athena-first gates. Feature requests now nudge toward PRs.
+- **CONTRIBUTING.md**: Added "Before You Open an Issue" section, elevated PR submission to #1 contribution method.
+- **SECURITY.md**: Fixed stale version reference (v1.5.x → v9.x).
+
+### Verification
+
+| Metric | Result |
+|--------|--------|
+| Protocol 413 version | 1.1 ✅ |
+| CLAUDE.md symlinks | Created (root + Athena-Public) ✅ |
+| Issue templates | 3/3 updated ✅ |
+
+---
+
+## v9.2.2 (21 February 2026)
+
+**S-Tier README Refactor + Docs Restructure**: Rewrote README from 671→224 lines. Created 4 new documentation pages.
+
+### Key Changes
+
+- **README**: Complete rewrite — removed verbose sections, added mermaid flow diagram, Linux analogy table, collapsible use cases.
+- **New Docs**: `YOUR_FIRST_SESSION.md`, `TIPS.md`, `IMPORTING.md`, `CLI.md` — content moved from README to dedicated pages.
+- **Version Badge**: Bumped to v9.2.2.
+
+---
+
+## v9.2.1 (20 February 2026)
+
+**Deep Audit & PnC Sanitization**: Sanitized 17 patterns across 13 files. Ensured no private-and-confidential data in public repo.
+
+### Key Changes
+
+- **PnC Audit**: Scanned all public files for leaked personal data, credentials, and private references. 17 patterns sanitized across 13 files.
+- **Collapsible Use Cases**: Converted 6 detailed use case descriptions into dropdown menus for cleaner README.
+- **Reddit Views**: Updated badge to 1M+ (aggregated across all threads).
+
+---
+
+## Earlier Versions
+
+<Accordion title="v9.2.0 - v9.0.0 (February 2026)">
+
+## v9.2.0 (17 February 2026)
+
+**Sovereignty Convergence**: Root↔Public unification via cherry-pick. Security hardening, SDK maturation, and full surface sync.
+
+### Key Changes
+
+- **CVE-2025-69872 Patch**: DSPy DiskCache vulnerability mitigated at SDK level.
+- **Semantic Cache**: LRU with disk persistence + cosine similarity matching for repeat queries.
+- **FlashRank Reranking**: Local cross-encoder for search quality (no external API calls).
+- **8 New SDK Modules**: `security`, `diagnostic_relay`, `shutdown`, `cli/`, `heartbeat`, `agentic_search`, `schema.sql`.
+- **5 CodeQL Fixes**: URL sanitization (`archive.py`), clear-text log redaction (`daily_briefing.py`, `self_optimize.py`, `pattern_recognition.py`), file permissions.
+- **Wiki Sync**: All 6 wiki pages updated to v9.2.0.
+- **Profile/Website Sync**: GitHub profile README, `about.astro`, `athena.astro`, `athena_kb.json` updated.
+
+---
+
+## v9.1.0 (17 February 2026)
+
+**Deep Audit & Sync**: Fixed 15 issues including dead links, version drift, dependency sync, AGENTS.md path errors, and workflow count corrections.
+
+---
+
+## v9.0.0 (16 February 2026)
+
+**First-Principles Workspace Refactor**: Complete structural audit and cleanup of the entire workspace. Zero regressions.
+
+### Key Changes
+
+- **Root Cleanup**: Moved 10 loose files (trading sims, drafts, audit docs) to proper `.context/` subdirectories.
+- **Build Artifacts**: Deleted `.agent/athena_sdk.egg-info/`, cleaned `.agent/temp/`.
+- **Session Log Hygiene**: Archived 114 stub session logs (less than 500 bytes).
+- **Dead Weight**: Archived `.framework/v7.0` → `.framework/archive/`.
+- **`.gitignore` Hardened**: Added `athenad.log`, `.athenad.pid`, `*.egg-info/`.
+
+</Accordion>
+
+<Accordion title="v8.3.1 - v8.0 (January-February 2026)">
+
+## v8.3.1 (11 February 2026)
+
+**Viral Validation Release**: 360K+ Reddit views, 867+ upvotes, 2,900+ shares. #4 r/ChatGPT, #1 r/GeminiAI.
+
+---
+
+## v8.2.1 (09 February 2026)
+
+**Metrics Sync & Architecture Refactor**: Updated session count and fixed automation scripts.
+
+---
+
+## v8.1.0 (31 January 2026)
+
+**Metrics Sync & Case Study Expansion**: Updated public metrics to reflect Session 995.
+
+---
+
+## v8.0-Stable (30 January 2026)
+
+**Zero-Point Refactor**: Sovereign Environment hardened, score-modulated RRF weights rebalanced.
+
+</Accordion>
+
+<Accordion title="v1.6.0 - v1.0.0 (December 2025 - February 2026)">
+
+## v1.6.0 (08 February 2026)
+
+**Curated Enhancement + Cleanup**: Added 17 new protocols, SDK modules, and workflows.
+
+---
+
+## v1.5.2 (04 February 2026)
+
+**Repository Enhancement**: Added skills framework, protocol exports, and knowledge graph.
+
+---
+
+## v1.5.1 (01 February 2026)
+
+**SDK Parity & CLI-First Documentation**: Added `athena save` command.
+
+---
+
+## v1.3.0 (10 January 2026)
+
+**Framework Materialization**: Made Athena-Public a *functional* framework, not just documentation.
+
+---
+
+## v1.2.x Series (January 2026)
+
+Multiple updates covering stats sync, README restructuring, backend refactoring.
+
+---
+
+## v1.0.0 (December 2025)
+
+**Initial Public Release**: SDK architecture, quickstart examples, core documentation.
+
+</Accordion>

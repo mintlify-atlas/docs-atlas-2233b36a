@@ -1,0 +1,325 @@
+---
+title: Your first session
+description: A guided walkthrough of your first Athena session. Learn how to build your profile, work with your agent, and create compounding memory.
+---
+
+This guide walks you through your first session with Athena, from initial boot to closing with saved context.
+
+## Before you begin
+
+Before you type a single command, ask yourself:
+
+<Note>
+**"How do I want Athena to best help me in my daily life?"**
+
+This is the guiding principle. Everything else — the setup, the profile, the commands — exists to serve *your* answer to this question.
+</Note>
+
+Maybe you want a co-pilot for coding. Maybe you want a strategist who remembers every decision you've made. Maybe you want an assistant that catches your blind spots before they become problems. Maybe you want all of these, and more.
+
+There is no wrong answer. But **having** an answer changes everything — because Athena doesn't decide what to be. *You* do.
+
+## How this works
+
+Athena works through a simple loop that compounds over time:
+
+```
+You share context → Athena learns → Athena serves you better → You share more
+```
+
+<Info>
+**The first session takes ~30 minutes. Every session after that takes ~1–2 minutes to boot.**
+</Info>
+
+| After... | What Athena knows |
+|:---------|:------------------|
+| **10 sessions** | Your preferences and working style |
+| **50 sessions** | Your decision frameworks and blind spots |
+| **200 sessions** | Your thinking patterns before you state them |
+| **500+ sessions** | Like a colleague who's been with you for years |
+
+<Tip>
+**Everything stays on your machine.** Athena stores all data as local Markdown files. Nothing leaves your device unless you explicitly configure cloud sync. Be as candid as you want — this is your private operating system.
+</Tip>
+
+## Step 1: Boot up
+
+Open your workspace in your agentic IDE and type in the **AI chat panel**:
+
+```
+/start
+```
+
+<Warning>
+`/start` is an **AI chat command** — type it in the chat window where you talk to the AI, **not** in the terminal.
+</Warning>
+
+Athena loads its core identity and initializes your workspace. On the first run, it creates the directory structure and workspace marker file (`.athena_root`).
+
+You should see output like:
+
+```
+⚡ Ready. (Session 1 started.)
+```
+
+## Step 2: Take the tutorial
+
+Type in the chat panel:
+
+```
+/tutorial
+```
+
+This activates a **Guided Walkthrough** — a 7-stage interactive tour. The most important stage is the **Profile Interview**, where Athena asks *you* questions to understand who you are and how you want to work.
+
+### The profile interview
+
+Think of this as your first real conversation. Athena asks, you answer. The more you share, the more useful Athena becomes.
+
+<Steps>
+  <Step title="Your goals">
+    Short-term, medium-term, and long-term goals
+
+    **Why it matters:** So every response is aligned with what you're *actually* building toward.
+  </Step>
+
+  <Step title="Your decision style">
+    Risk appetite, speed vs quality, how you make tradeoffs
+
+    **Why it matters:** So it frames options the way *you* think about decisions.
+  </Step>
+
+  <Step title="Your strengths">
+    What you're great at, where you excel
+
+    **Why it matters:** So it leans into what you're great at, rather than duplicating it.
+  </Step>
+
+  <Step title="Your blind spots">
+    Common mistakes, areas where you need support
+
+    **Why it matters:** So it actively watches for the mistakes *you* tend to make.
+  </Step>
+
+  <Step title="Your communication style">
+    How you prefer to receive information
+
+    **Why it matters:** So it speaks in *your* voice, not a generic AI voice.
+  </Step>
+
+  <Step title="Your life context">
+    Work, family, stressors, interests
+
+    **Why it matters:** So it understands *you*, not just your job title.
+  </Step>
+</Steps>
+
+<Warning>
+**A one-line answer gives you a generic chatbot. A paragraph gives you a calibrated co-pilot.** This is a one-time investment that pays compounding returns across hundreds of sessions.
+</Warning>
+
+<Tip>
+**You can skip any stage.** Say "skip" to jump ahead, or "I'm done" to exit early. Athena ships with a working default profile. But the more you invest here, the faster the flywheel spins.
+</Tip>
+
+### Full tutorial stages
+
+| Stage | What happens | Duration |
+|:------|:-------------|:---------|
+| **1. Welcome** | What's in the box — the full starter kit | ~1 min |
+| **2. Core Loop** | How `/start` → Work → `/end` compounds over time | ~2 min |
+| **3. Profile Interview** | Interactive Q&A to build your personal profile | ~15–25 min |
+| **4. Search Demo** | See Athena's hybrid RAG search in action | ~2 min |
+| **5. Save Demo** | Learn mid-session checkpointing | ~1 min |
+| **6. Key Commands** | Your essential toolkit (`/think`, `/research`, `/save`) | ~2 min |
+| **7. Graduation** | Summary + next steps | ~30 sec |
+
+<Info>
+**Shortcut**: If you want to skip the tour and jump straight to profile building, just tell Athena about yourself directly — no workflow needed.
+</Info>
+
+## Step 3: Review your profile
+
+After the interview, Athena writes your profile to `.context/memories/user_profile.md`. **Read it.** Edit anything that's wrong or incomplete.
+
+This file is what Athena loads on every `/start` — it's the single source of truth for who you are.
+
+```bash
+# View your profile
+cat .context/memories/user_profile.md
+```
+
+You can edit this file directly anytime:
+
+```markdown
+# User Profile
+
+## Goals
+- Build a personal knowledge management system
+- Learn prompt engineering
+- Automate repetitive tasks
+
+## Decision Style
+- Risk-averse in production, experimental in side projects
+- Prefer clarity over cleverness
+- Speed matters for prototypes, quality matters for shipped code
+
+## Strengths
+- Strong systems thinking
+- Good at breaking down complex problems
+
+## Blind Spots
+- Tend to over-engineer early
+- Sometimes skip documentation
+
+## Communication Style
+- Direct, concise
+- Prefer examples over abstractions
+- Appreciate challenges to my assumptions
+```
+
+## Step 4: Work naturally
+
+Now just work. Talk to Athena like a colleague:
+
+<CardGroup cols={2}>
+  <Card title="Ask questions" icon="question">
+    "How does semantic search work in Athena?"
+  </Card>
+  <Card title="Make decisions together" icon="scale-balanced">
+    "Should I use SQLite or Postgres for this project?"
+  </Card>
+  <Card title="Draft documents" icon="file-pen">
+    "Write a project proposal for a team wiki"
+  </Card>
+  <Card title="Review code" icon="code">
+    "Review this function for edge cases"
+  </Card>
+</CardGroup>
+
+Every exchange is automatically saved. Every decision is logged. Every insight compounds.
+
+### Save checkpoints mid-session
+
+During long sessions, save checkpoints:
+
+```
+/save
+```
+
+Or use the CLI:
+
+```bash
+athena save "Finished authentication module"
+```
+
+This appends a timestamped checkpoint to your current session log:
+
+```markdown
+### ⚡ Checkpoint [14:23]
+Finished authentication module
+```
+
+## Step 5: Close the session
+
+When you're done:
+
+```
+/end
+```
+
+Athena finalizes the session log, extracts key decisions, and commits everything to memory. Next time you `/start`, it picks up exactly where you left off — with full context.
+
+You should see:
+
+```
+✅ Session 1 closed and committed.
+```
+
+Your session log is saved to `.context/memories/session_logs/YYYY-MM-DD-session-01.md`.
+
+## Tips for a great first session
+
+<CardGroup cols={2}>
+  <Card title="Start with your answer" icon="compass">
+    "How do I want Athena to help me?" — say it out loud. It shapes everything.
+  </Card>
+  <Card title="Be honest about weaknesses" icon="user-shield">
+    The blind spots you share are the ones Athena will actively monitor.
+  </Card>
+  <Card title="Share real goals" icon="bullseye">
+    Athena optimizes for where you're *going*, not where you think you *should* be going.
+  </Card>
+  <Card title="Include personal context" icon="house">
+    Athena isn't just for work. The more it understands your full life, the better it calibrates priorities.
+  </Card>
+  <Card title="Edit the profile after" icon="pen">
+    The interview is a draft. You can always refine `.context/memories/user_profile.md` directly.
+  </Card>
+  <Card title="Don't worry about over-sharing" icon="lock">
+    Everything is local. No cloud. No tracking. Your machine, your data.
+  </Card>
+</CardGroup>
+
+## What happens next
+
+After your first session, here's what changes:
+
+1. **Session 2 is faster** — Boot time drops from ~30 min (first session) to ~1–2 min (ongoing sessions)
+2. **Context accumulates** — Each session builds on the last, creating a compounding knowledge base
+3. **Patterns emerge** — After 10–20 sessions, Athena starts anticipating your needs
+4. **Memory search works** — With more data, semantic search becomes powerful for recall
+
+## Next steps after your first session
+
+<CardGroup cols={2}>
+  <Card title="Build your first agent" icon="robot" href="/your-first-agent">
+    Create a custom agent in 5 minutes
+  </Card>
+  <Card title="Explore workflows" icon="diagram-project" href="/workflows">
+    50+ available workflows — `/think`, `/research`, `/ultrathink`
+  </Card>
+  <Card title="Browse protocols" icon="book" href="/protocols">
+    200+ decision frameworks for inspiration
+  </Card>
+  <Card title="Customize identity" icon="user-gear" href="/customization">
+    Tune how Athena understands and responds to you
+  </Card>
+</CardGroup>
+
+## Common questions
+
+<AccordionGroup>
+  <Accordion title="Can I skip the tutorial?">
+    Yes! Just start working. Athena ships with a working default profile. The tutorial accelerates personalization, but it's optional.
+  </Accordion>
+
+  <Accordion title="How do I update my profile later?">
+    Edit `.context/memories/user_profile.md` directly, or just tell Athena in conversation. It will update the file for you.
+  </Accordion>
+
+  <Accordion title="What if I make a mistake in the interview?">
+    No problem. Everything is stored in plain Markdown files. Edit `.context/memories/user_profile.md` and fix it.
+  </Accordion>
+
+  <Accordion title="Can I use Athena for multiple projects?">
+    Yes. Either:
+    - Work on multiple projects from one Athena workspace (recommended)
+    - Create separate Athena workspaces with `athena init`
+    - Use multi-root workspaces in your IDE
+  </Accordion>
+
+  <Accordion title="Is my data private?">
+    Yes. Everything is stored locally as Markdown files. Nothing leaves your machine unless you explicitly configure cloud sync (optional Supabase integration).
+  </Accordion>
+
+  <Accordion title="What if I switch AI models?">
+    That's the point! Your memory stays on your machine. Switch from Claude to GPT to Gemini anytime — the memory layer is model-agnostic.
+  </Accordion>
+</AccordionGroup>
+
+---
+
+<Info>
+Athena becomes what you need it to be. Your first session is where you tell it what that is.
+</Info>

@@ -1,0 +1,436 @@
+---
+title: Decision-Making
+description: Make strategic decisions using your actual risk tolerance, goals, and decision history — not generic advice from a chatbot with no context.
+---
+
+Athena transforms decision-making by treating your **decision history as a compounding asset**. Every choice you make, every tradeoff you evaluate, every risk you accept or reject — all of it becomes context for future decisions.
+
+## The Generic Advice Problem
+
+<CardGroup cols={2}>
+  <Card title="No Personal Context" icon="user-slash">
+    ChatGPT gives you the same career advice it gives everyone: "Consider work-life balance, growth opportunities, compensation..."
+  </Card>
+  
+  <Card title="Forgotten Decisions" icon="brain-slash">
+    You made a similar decision 6 months ago. What did you learn? Platform memory doesn't remember.
+  </Card>
+  
+  <Card title="No Risk Profile" icon="shield-slash">
+    The AI doesn't know if you're risk-averse or risk-seeking. You get one-size-fits-all recommendations.
+  </Card>
+  
+  <Card title="Lost Reasoning" icon="file-slash">
+    *Why* did you choose Option A over Option B last time? The reasoning is lost in chat history.
+  </Card>
+</CardGroup>
+
+## How Athena Solves This
+
+### Decision History as Context
+
+<Steps>
+  <Step title="First Decision (Session 5)">
+    ```text
+    You: "Should I take this job offer? $120k salary,
+          remote work, startup with 20 people."
+    
+    AI: "What's important to you in this decision?"
+    
+    You: "Stability over upside. I have a family.
+          Can't risk equity that might be worth zero."
+    
+    AI: [Analyzes offer through stability lens]
+        Filed: decisions/job-offer-2025-startup.md
+        Risk profile: Risk-averse, values stability
+    ```
+  </Step>
+  
+  <Step title="Second Decision (Session 50)">
+    ```text
+    You: "Another offer: $100k base + equity,
+          Series A startup, 50 people."
+    
+    AI: [Loads Session 5 context]
+        "Last time you prioritized stability over equity.
+         This offer has lower base, higher risk.
+         Based on your profile, this seems misaligned.
+         Want to explore it anyway?"
+    ```
+  </Step>
+  
+  <Step title="Decision Evolution (Session 100)">
+    ```text
+    You: "My risk tolerance has changed. Kids are older,
+          savings are solid. I'm open to equity now."
+    
+    AI: [Updates risk profile]
+        "Noted. Your last 3 decisions prioritized stability.
+         Flagging this shift for future career evaluations."
+    ```
+  </Step>
+</Steps>
+
+<Note>
+**The AI learns your decision-making patterns** — not just what you choose, but *why* you choose it.
+</Note>
+
+## Decision Frameworks
+
+### Career Decisions
+
+<Accordion title="Job Offer Evaluation">
+  **Athena's approach:**
+  
+  ```text
+  You: "Evaluate this offer: $150k, FAANG company,
+        on-site 3 days/week, manager role."
+  
+  AI: [Loads your decision history]
+      
+      Analysis based on YOUR context:
+      - Compensation: +25% vs current (aligns with your
+        "only move for >20% increase" rule from Session 12)
+      - Remote: Hybrid vs your preference for full remote
+        (friction point)
+      - Role: Management vs IC — you explored this in
+        Session 35 and chose IC path
+      - Company: FAANG stability matches risk profile
+      
+      Red flags based on your history:
+      - Management role contradicts Session 35 decision
+      - Hybrid conflicts with Session 22 "full remote" priority
+      
+      Recommendation: Decline unless they offer IC track
+                       or full remote.
+  ```
+  
+  **This isn't generic advice.** It's your own decision framework, learned from 50 sessions.
+</Accordion>
+
+<Accordion title="Career Path Planning">
+  **Long-term trajectory:**
+  
+  ```text
+  Session 10:  Chose IC over management
+  Session 30:  Prioritized deep technical work
+  Session 60:  Rejected a director role (too much politics)
+  Session 90:  Asked about staff engineer path
+  
+  AI (Session 100):
+  "Your decisions consistently favor technical depth
+   over people management. The staff engineer path
+   aligns with this pattern. Want to plan a roadmap?"
+  ```
+  
+  **Pattern recognition** across 90 sessions surfaces your true career preference.
+</Accordion>
+
+### Financial Decisions
+
+<CardGroup cols={2}>
+  <Card title="Investment Strategy" icon="chart-line">
+    **Your risk profile (learned from decisions):**
+    
+    Session 5: "I prefer index funds over individual stocks"
+    Session 20: "I don't touch crypto"
+    Session 40: "Emergency fund = 12 months expenses"
+    
+    **New decision (Session 50):**
+    
+    "Should I invest in this AI startup?"
+    
+    AI: "This conflicts with your index fund preference and risk aversion. Your emergency fund is solid (Session 40), so you *could* take the risk, but it's out of character. What's changed?"
+  </Card>
+  
+  <Card title="Budget Tradeoffs" icon="scale-unbalanced">
+    **Spending pattern learning:**
+    
+    Session 15: "I value experiences over things"
+    Session 35: "Cut subscriptions, keep travel budget"
+    
+    **New decision (Session 55):**
+    
+    "Should I buy this $2k laptop or take a $2k trip?"
+    
+    AI: "Your past decisions favor travel (Session 35). Unless the laptop unlocks income, the trip aligns better with your values."
+  </Card>
+</CardGroup>
+
+### Life Decisions
+
+<Accordion title="Housing & Relocation">
+  **Multi-factor decision-making:**
+  
+  ```text
+  You: "Considering moving from City A to City B.
+        Job offers similar pay. Cost of living 20% lower."
+  
+  AI: [Scans decision history for location preferences]
+      
+      Context from past sessions:
+      - Session 8: "I hate long commutes"
+      - Session 25: "Family is 2 hours away, want to be closer"
+      - Session 40: "Kids' schools are great here"
+      
+      Analysis:
+      - Cost of living: Positive (20% savings)
+      - Commute: Unknown — need City B commute data
+      - Family proximity: Negative (moves you farther)
+      - Kids' schools: Disruption risk
+      
+      Missing data: City B commute, school quality
+      High-weight factor: Family proximity (mentioned 3x)
+      
+      Preliminary: Lean against unless City B is closer
+                   to family or schools are significantly better.
+  ```
+  
+  **The AI doesn't give generic relocation advice.** It uses YOUR priorities, learned from 40 sessions.
+</Accordion>
+
+<Accordion title="Health & Lifestyle">
+  **Pattern-based recommendations:**
+  
+  ```text
+  Session 20: "Started running, feel great"
+  Session 30: "Stopped running, energy is low"
+  Session 50: "Trying yoga instead"
+  Session 55: "Yoga isn't clicking"
+  
+  AI (Session 60):
+  "You felt best during the running phase (Session 20-30).
+   Every time you stop, energy drops.
+   Yoga didn't provide the same benefit.
+   Recommendation: Return to running — it's proven for you."
+  ```
+  
+  **Your own data** → personalized recommendation.
+</Accordion>
+
+## Strategic Decision Workflows
+
+### Risk Analysis
+
+<CodeGroup>
+```text Session 1: Establish Risk Tolerance
+You: "I'm evaluating a business opportunity.
+      How do I think about risk?"
+
+AI: "Let's establish your baseline:
+     - Financial runway: How many months can you operate
+       without income?
+     - Dependents: Who relies on your income?
+     - Downside tolerance: What's the worst acceptable outcome?"
+
+You: "12 months runway, 2 kids, can't lose more than $50k."
+
+AI: [Files risk profile]
+    Risk tolerance: Moderate
+    Max loss: $50k
+    Time horizon: 12 months
+```
+
+```text Session 30: Apply Risk Framework
+You: "Evaluating a $40k investment in equipment.
+      Expected ROI: 18 months."
+
+AI: [Loads risk profile from Session 1]
+    
+    Risk check:
+    - Investment: $40k (under $50k max loss ✓)
+    - Payback: 18 months (beyond 12-month horizon ✗)
+    - Runway impact: Reduces to 8 months (risky ✗)
+    
+    Red flag: Payback period exceeds your risk horizon.
+               This violates your Session 1 constraints.
+    
+    Recommendation: Decline or negotiate shorter payback.
+```
+</CodeGroup>
+
+### Scenario Analysis
+
+<Steps>
+  <Step title="Define Scenarios (Session 1)">
+    ```text
+    You: "Evaluating a career change. Model 3 scenarios:
+          1. Stay at current job (baseline)
+          2. Take startup offer (risky)
+          3. Freelance (flexible)"
+    ```
+  </Step>
+  
+  <Step title="Score Each Scenario (Sessions 2-5)">
+    ```text
+    Session 2: Score Scenario 1 (current job)
+    - Stability: 9/10
+    - Growth: 4/10
+    - Income: 8/10
+    - Fulfillment: 5/10
+    
+    Session 3: Score Scenario 2 (startup)
+    Session 4: Score Scenario 3 (freelance)
+    ```
+  </Step>
+  
+  <Step title="Weight by Your Priorities (Session 6)">
+    ```text
+    AI: "Based on past decisions, you weight:
+         - Stability: 40% (high priority)
+         - Growth: 20%
+         - Income: 25%
+         - Fulfillment: 15%"
+    ```
+  </Step>
+  
+  <Step title="Compute Weighted Scores (Session 7)">
+    ```text
+    AI: Weighted scores:
+        1. Current job: 7.35
+        2. Startup: 5.80
+        3. Freelance: 6.50
+    
+        Recommendation: Stay at current job.
+                        Freelance is second if you value
+                        flexibility over income.
+    ```
+  </Step>
+</Steps>
+
+<Tip>
+**The AI learns your priority weights** from past decisions. You don't manually score — it infers from your history.
+</Tip>
+
+### Decision Retrospectives
+
+<Accordion title="6-Month Check-In">
+  **Learning from outcomes:**
+  
+  ```text
+  Session 50: Chose Job Offer A over Job Offer B
+  
+  Session 75 (6 months later):
+  You: "How's the job decision working out?"
+  
+  AI: [Loads Session 50 decision]
+      
+      Your reasoning at the time:
+      - Chose A for higher base salary ($150k vs $130k)
+      - Accepted hybrid over remote for the pay bump
+      
+      Outcomes observed:
+      - Session 60: "Commute is draining" (negative)
+      - Session 70: "Saving $2k/month" (positive)
+      - Session 72: "Considering quitting" (critical)
+      
+      Analysis:
+      You underweighted commute friction.
+      The $20k pay increase ($1,667/mo) doesn't offset
+      the lifestyle cost.
+      
+      Lesson for future decisions:
+      Remote/hybrid is a first-tier filter, not a
+      negotiable tradeoff.
+  ```
+  
+  **This insight feeds into the next job decision.**
+</Accordion>
+
+## Practical Tips
+
+<Warning>
+**Don't Fake Consistency**
+
+Your risk tolerance, priorities, and goals will evolve. Tell the AI when they change:
+
+"I used to prioritize stability, but I'm ready for more risk now."
+
+The AI updates your profile and flags the shift.
+</Warning>
+
+<Tip>
+**Use Real Numbers**
+
+Vague: "I want to save more."
+
+Specific: "I want to save $1,000/month for 12 months."
+
+The AI can track progress and hold you accountable.
+</Tip>
+
+<Tip>
+**File Decisions, Not Just Outcomes**
+
+After every major decision:
+
+```text
+You: "I chose Option A because X, Y, Z.
+      My alternatives were B and C.
+      I rejected B because..."
+```
+
+The AI files the *reasoning*, not just the choice.
+</Tip>
+
+## Key Outcomes
+
+<CardGroup cols={2}>
+  <Card title="Personalized Advice" icon="user">
+    Recommendations based on YOUR risk profile, YOUR goals, YOUR history — not generic templates.
+  </Card>
+  
+  <Card title="Pattern Recognition" icon="brain">
+    "You've rejected 3 management roles in 2 years. You're an IC." — learned from decisions.
+  </Card>
+  
+  <Card title="Accountability" icon="check-to-slot">
+    "You said you'd save $1k/month. You're at $750. What changed?" — tracks commitments.
+  </Card>
+  
+  <Card title="Evolution Tracking" icon="timeline">
+    "Your risk tolerance shifted between Session 50 and Session 100." — documents growth.
+  </Card>
+</CardGroup>
+
+## Example: 100-Session Decision Journey
+
+```text
+Session 10:  Established career goals (IC over management)
+Session 25:  Rejected startup offer (too risky)
+Session 40:  Learned React, filed skill progression
+Session 60:  Risk tolerance update (more open to equity)
+Session 75:  Evaluated 3 job offers using Session 10 goals
+Session 80:  Chose offer with equity (Session 60 shift)
+Session 100: Retrospective — offer worked out, equity vested
+
+AI (Session 100):
+"Your decision-making has evolved:
+ - Sessions 1-50: Risk-averse, stability-focused
+ - Sessions 50-100: Moderate risk, equity-tolerant
+ 
+ This shift started in Session 60 when your financial
+ runway increased. Future career decisions should assume
+ equity-friendly profile unless circumstances change."
+```
+
+## Comparison: Athena vs Generic AI
+
+| Scenario | Generic ChatGPT | Athena |
+|:---------|:----------------|:-------|
+| **Job offer evaluation** | "Consider compensation, culture, growth..." | "This offer contradicts your Session 35 preference for IC roles. Red flag." |
+| **Risk tolerance** | "Assess your risk appetite" (every time) | "Your max loss is $50k per Session 1. This exceeds it." |
+| **Decision retrospective** | Can't access past conversations | "6 months ago you chose A over B. Outcome: regret commute. Lesson: remote is non-negotiable." |
+| **Priority evolution** | No memory of past priorities | "Your priorities shifted in Session 60. Updating decision framework." |
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Getting Started" icon="rocket" href="/getting-started">
+    Set up Athena and start building your decision history
+  </Card>
+  
+  <Card title="Life Management" icon="home" href="/use-cases/life-management">
+    Apply decision frameworks to daily life
+  </Card>
+</CardGroup>

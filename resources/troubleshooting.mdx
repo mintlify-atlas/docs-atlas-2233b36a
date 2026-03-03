@@ -1,0 +1,206 @@
+---
+title: "Troubleshooting"
+description: "Common issues and solutions when working with Athena framework"
+---
+
+## Installation Issues
+
+### "athena: command not found"
+
+Ensure the SDK is installed from the cloned repo **inside a virtual environment**:
+
+```bash
+cd Athena-Public
+python3 -m venv .venv
+source .venv/bin/activate   # macOS / Linux
+pip install -e .
+```
+
+If you've already installed it, make sure your virtual environment is activated (`source .venv/bin/activate`).
+
+### "error: externally-managed-environment" (PEP 668)
+
+This error occurs on macOS (Homebrew Python) and Ubuntu 23.04+ when installing packages without a virtual environment. Fix:
+
+```bash
+python3 -m venv .venv
+source .venv/bin/activate
+pip install -e .
+```
+
+<Warning>
+On macOS (Homebrew) and Ubuntu 23.04+, installing packages without a virtual environment will fail with `externally-managed-environment`. Always create a `.venv` first.
+</Warning>
+
+## Session & Workflow Issues
+
+### Session logs not saving
+
+Run `/start` at the beginning of your session. The agent needs to initialize before it can log.
+
+**Solution:**
+```bash
+# In your AI IDE
+/start
+```
+
+Check `.context/memories/session_logs/` to verify logs are being created.
+
+### "No session log found" error
+
+This occurs when you try to run `/end` or `/save` without first running `/start`.
+
+**Solution:**
+1. Run `/start` first to create a session log
+2. Continue your work
+3. Then use `/save` or `/end` as needed
+
+### Workflow not recognized
+
+Ensure the workflow file exists in `.agent/workflows/` directory.
+
+**Check:**
+```bash
+ls .agent/workflows/
+```
+
+You should see files like `start.md`, `end.md`, `think.md`, etc.
+
+## Context & Memory Issues
+
+### Context window errors
+
+Athena auto-retrieves ~2K tokens of context. If you're hitting limits, your session may have drifted.
+
+**Solution:**
+Run `/save` to checkpoint and start fresh:
+
+```bash
+/save
+```
+
+This creates a checkpoint and frees up context space.
+
+### Agent seems to forget previous conversations
+
+This usually means session logs aren't being properly saved or loaded.
+
+**Check:**
+1. Verify `/start` was run at the beginning of the session
+2. Check that `.context/memories/session_logs/` contains recent logs
+3. Ensure the SDK is properly installed (`pip install -e .`)
+
+## Script & Automation Issues
+
+### Scripts don't run
+
+**Check Python is installed:**
+```bash
+python3 --version
+```
+
+Should return Python 3.10 or higher.
+
+### Permission denied (macOS/Linux)
+
+Scripts may need execute permissions:
+
+```bash
+chmod +x .agent/scripts/*.py
+```
+
+### Windows encoding errors
+
+Run `chcp 65001` before starting, or use the included `ensure_env.ps1`:
+
+```powershell
+chcp 65001
+# OR
+.\ensure_env.ps1
+```
+
+## Performance Issues
+
+### Slow boot times
+
+| Mode | Expected Time |
+|------|---------------|
+| Cold boot (first session) | ~1–2 minutes |
+| Warm boot (cached) | < 5 seconds |
+
+If your boot time exceeds these ranges:
+
+1. **Check your internet connection** (for cloud embeddings)
+2. **Reduce context loading** by archiving old session logs
+3. **Use local mode** to avoid network latency
+
+### High API costs
+
+Most users spend **< $5/month** on API calls.
+
+If costs are higher:
+
+1. **Switch to local mode** for basic usage
+2. **Review embedding frequency** in your configuration
+3. **Use lighter models** for routine tasks
+4. **Avoid GraphRAG** if you don't need it (~$50 one-time cost)
+
+## Vector Search & Database Issues
+
+### VectorRAG not working
+
+Ensure you have the required API keys configured:
+
+```bash
+export GOOGLE_API_KEY="your-key-here"
+export SUPABASE_URL="your-url-here"
+export SUPABASE_ANON_KEY="your-key-here"
+```
+
+### Database connection errors
+
+**Check Supabase credentials:**
+1. Verify `SUPABASE_URL` and `SUPABASE_ANON_KEY` are set
+2. Test connection to Supabase dashboard
+3. Check if free tier limits have been exceeded
+
+## IDE Integration Issues
+
+### Cursor/VS Code not recognizing workspace
+
+Ensure `.athena_root` file exists in your workspace root:
+
+```bash
+# Should exist after running athena init
+ls -la .athena_root
+```
+
+If missing, run:
+```bash
+athena init
+```
+
+### Antigravity integration issues
+
+Verify AGENTS.md is in your workspace root:
+
+```bash
+athena init --ide antigravity
+```
+
+## Getting Help
+
+If you're still experiencing issues:
+
+1. **Check the FAQ** for common questions
+2. **Search GitHub Issues**: [Existing issues](https://github.com/winstonkoh87/Athena-Public/issues)
+3. **Ask in Discussions**: [Community forum](https://github.com/winstonkoh87/Athena-Public/discussions)
+4. **Report a bug**: [New issue](https://github.com/winstonkoh87/Athena-Public/issues/new)
+
+<Tip>
+When reporting issues, include:
+- Your OS and Python version
+- Full error message
+- Steps to reproduce
+- Relevant configuration files (with secrets redacted)
+</Tip>

@@ -1,0 +1,87 @@
+---
+title: "/save - Mid-Session Checkpoint"
+description: "Save progress mid-session without closing, creating a rollback point for risky experiments"
+---
+
+# /save — Mid-Session Checkpoint
+
+The `/save` workflow creates a checkpoint mid-session without the full overhead of closing and reopening. Use it to preserve progress, create rollback points, or save before risky experiments.
+
+## When to Use
+
+- Long sessions with natural break points
+- Before switching topics (preserve context)
+- Before risky experiments (rollback point)
+- "Save my progress, I'll be back"
+- When you want to checkpoint without triggering full maintenance
+
+## Behavior
+
+The workflow executes a lightweight save operation:
+
+### 1. Quick Session Log Update
+
+Appends current progress to the session log in `.context/memories/session_logs/`:
+
+```markdown
+### Checkpoint [HH:MM SGT]
+
+- [Brief summary of what was discussed/accomplished since last save]
+- [Any key decisions or insights]
+```
+
+### 2. Resume
+
+Confirms the checkpoint and continues the session:
+
+**Output**: "📍 Checkpoint saved. Continuing session."
+
+## Usage Example
+
+```
+User: I'm about to refactor the database schema. Let me save first.
+
+User: /save
+
+Athena: 📍 Checkpoint saved. Continuing session.
+
+User: Okay, now let's refactor the user table...
+```
+
+## What /save SKIPS (deferred to /end)
+
+| Task | /save | /end |
+|------|-------|------|
+| Session log update | ✅ | ✅ |
+| Maintenance scripts | ❌ | ✅ |
+| Coherence check | ❌ | ✅ |
+| Cross-reference audit | ❌ | ✅ |
+| Git commit | ❌ | ✅ |
+| Profile/protocol updates | ❌ | ✅ |
+
+## Why Use /save Instead of /end?
+
+**Use `/save` when**:
+- You're in the middle of a complex task and want to preserve intermediate progress
+- You're experimenting and want a rollback point
+- You're switching contexts but staying in the same session
+- You want minimal overhead (no full maintenance cycle)
+
+**Use `/end` when**:
+- You're done for the day
+- You want to commit learnings to long-term memory
+- You want full workspace maintenance and sync
+- You want to create a proper git commit
+
+## Best Practices
+
+1. **Save before experiments** - Before trying something risky, `/save` first so you can reference what worked
+2. **Natural break points** - Use `/save` when switching between major topics
+3. **Long sessions** - In multi-hour sessions, `/save` periodically to prevent context loss
+4. **Still use `/end`** - `/save` doesn't replace `/end` — always properly close sessions
+
+## Related Workflows
+
+- [/start](/workflows/start) - Boot a new session
+- [/end](/workflows/end) - Properly close session with full maintenance
+- [All Workflows](/workflows/all-workflows) - Complete workflow reference

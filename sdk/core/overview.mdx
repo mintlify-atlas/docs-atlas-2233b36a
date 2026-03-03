@@ -1,0 +1,155 @@
+---
+title: SDK Core Overview
+description: Core primitives and subsystems of the Athena Operating System
+---
+
+# SDK Core Overview
+
+The `athena.core` module provides the foundational primitives and subsystems for the Athena Operating System. This includes configuration management, permissions, identity, health monitoring, and daemon services.
+
+## Module Structure
+
+```python
+from athena.core import config, permissions, models
+from athena.core.health import HealthCheck
+from athena.core.sandbox import SandboxRunner
+```
+
+## Key Components
+
+### Configuration Management
+
+Centralized configuration and path discovery for the Athena workspace.
+
+```python
+from athena.core.config import (
+    PROJECT_ROOT,
+    AGENT_DIR,
+    CONTEXT_DIR,
+    get_current_session_log
+)
+```
+
+**Key Directories:**
+- `PROJECT_ROOT` - Workspace root (discovered via `pyproject.toml`)
+- `AGENT_DIR` - `.agent/` directory containing skills and state
+- `CONTEXT_DIR` - `.context/` directory for memory and logs
+- `MEMORY_DIR` - `.athena/memory/` for user profile and learnings
+
+[Read more →](/sdk/core/config)
+
+### Permissions System
+
+Three-layer permission system controlling tool execution and data sensitivity.
+
+```python
+from athena.core.permissions import (
+    get_permissions,
+    Permission,
+    Sensitivity,
+    Action
+)
+
+perms = get_permissions()
+perms.check("smart_search")  # Raises PermissionDenied if blocked
+perms.label("session_content")  # Returns Sensitivity.INTERNAL
+perms.set_secret_mode(True)  # Activates demo mode
+```
+
+**Permission Levels:**
+- `Permission.READ` - Query/read data
+- `Permission.WRITE` - Modify session logs, checkpoints
+- `Permission.ADMIN` - Modify config, clear caches
+- `Permission.DANGEROUS` - Delete data, run shell commands
+
+[Read more →](/sdk/core/permissions)
+
+### Health Monitoring
+
+System health checks for critical services.
+
+```python
+from athena.core.health import HealthCheck
+
+# Run all health checks
+HealthCheck.run_all()
+
+# Check specific subsystems
+vector_status = HealthCheck.check_vector_api()
+db_status = HealthCheck.check_database()
+```
+
+### Sandbox Execution
+
+Docker-based isolated execution for untrusted scripts (Law #1: No Irreversible Ruin).
+
+```python
+from athena.core.sandbox import SandboxRunner, SandboxExecRequest
+
+runner = SandboxRunner()
+if runner.is_available():
+    request = SandboxExecRequest(
+        script="print('Hello from sandbox')",
+        timeout=30,
+        allow_network=False
+    )
+    response = runner.execute(request)
+    print(response.stdout)
+```
+
+**Isolation Features:**
+- No network access (`--network none`)
+- Read-only filesystem
+- Non-root user
+- Memory limit (256MB)
+- CPU limit (1.0 core)
+- Configurable timeout
+
+### Data Models
+
+Shared Pydantic models and dataclasses.
+
+```python
+from athena.core.models import SearchResult
+
+result = SearchResult(
+    id="doc-001",
+    content="Relevant content...",
+    source="sessions",
+    score=0.85,
+    metadata={"path": ".context/memories/session.md"}
+)
+```
+
+## Athena Daemon (athenad)
+
+The active OS kernel providing:
+1. File system watching (polling-based)
+2. Background vectorization into GraphRAG
+3. Self-healing and health monitoring
+
+```python
+from athena.core.athenad import AthenaDaemon
+
+daemon = AthenaDaemon()
+daemon.start()  # Begins watch loop
+```
+
+**Architecture:**
+```
+[Main Thread] --(Queue)--> [Indexer Thread]
+     ^                          |
+     | (File Change)            v
+[File System] <-------- [GraphRAG Store]
+```
+
+**Watch Configuration:**
+- Poll interval: 5 seconds
+- Watched directories: `.context`, `.agent/skills`, `src`, `Athena-Public`
+- Excludes: `Winston/`, `archive/`, `.venv/`, `__pycache__/`, `.git/`
+
+## See Also
+
+- [Boot Orchestrator](/sdk/core/boot) - Modular boot sequence
+- [Configuration](/sdk/core/config) - Path discovery and workspace setup
+- [Permissions](/sdk/core/permissions) - Access control and sensitivity

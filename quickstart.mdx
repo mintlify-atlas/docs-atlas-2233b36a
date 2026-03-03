@@ -1,80 +1,147 @@
 ---
-title: "Quickstart"
-description: "Start building awesome documentation in minutes"
+title: Quick start
+description: Get up and running with Athena in 5 minutes. Works on macOS, Windows, and Linux.
 ---
 
-## Get started in three steps
+Get Athena running in 5 minutes. This guide gets you to your first session as quickly as possible.
 
-Get your documentation site running locally and make your first customization.
+<Steps>
+  <Step title="Clone the repository">
+    Clone the Athena repository to your local machine:
 
-### Step 1: Set up your local environment
+    ```bash
+    git clone https://github.com/winstonkoh87/Athena-Public.git
+    cd Athena-Public
+    ```
 
-<AccordionGroup>
-  <Accordion icon="copy" title="Clone your docs locally">
-    During the onboarding process, you created a GitHub repository with your docs content if you didn't already have one. You can find a link to this repository in your [dashboard](https://dashboard.mintlify.com).
-    
-    To clone the repository locally so that you can make and preview changes to your docs, follow the [Cloning a repository](https://docs.github.com/en/repositories/creating-and-managing-repositories/cloning-a-repository) guide in the GitHub docs.
-  </Accordion>
-  <Accordion icon="rectangle-terminal" title="Start the preview server">
-    1. Install the Mintlify CLI: `npm i -g mint`
-    2. Navigate to your docs directory and run: `mint dev`
-    3. Open `http://localhost:3000` to see your docs live!
-    
-    <Tip>Your preview updates automatically as you edit files.</Tip>
-  </Accordion>
-</AccordionGroup>
+    <Info>
+    Clone it anywhere you keep projects (e.g. `~/Projects/`). This folder **is** your Athena workspace — your memory, protocols, and config all live here.
+    </Info>
+  </Step>
 
-### Step 2: Deploy your changes
+  <Step title="Set up a virtual environment">
+    Create and activate a Python virtual environment:
 
-<AccordionGroup>
-  <Accordion icon="github" title="Install our GitHub app">
-    Install the Mintlify GitHub app from your [dashboard](https://dashboard.mintlify.com/settings/organization/github-app).
-    
-    Our GitHub app automatically deploys your changes to your docs site, so you don't need to manage deployments yourself.
-</Accordion>
-<Accordion icon="palette" title="Update your site name and colors">
-    For a first change, let's update the name and colors of your docs site.
+    <CodeGroup>
+    ```bash macOS / Linux
+    python3 -m venv .venv
+    source .venv/bin/activate
+    ```
 
-    1. Open `docs.json` in your editor.
-    2. Change the `"name"` field to your project name.
-    3. Update the `"colors"` to match your brand.
-    4. Save and see your changes instantly at `http://localhost:3000`.
+    ```bash Windows
+    python3 -m venv .venv
+    .venv\Scripts\activate
+    ```
+    </CodeGroup>
 
-    <Tip>Try changing the primary color to see an immediate difference!</Tip>
-  </Accordion>
-</AccordionGroup>
+    <Warning>
+    On macOS (Homebrew) and Ubuntu 23.04+, installing packages without a virtual environment will fail with `externally-managed-environment`. Always create a `.venv` first.
+    </Warning>
+  </Step>
 
-### Step 3: Go live
+  <Step title="Install the SDK">
+    Install Athena in your virtual environment:
 
-<Accordion icon="rocket" title="Publish your docs">
-  1. Commit and push your changes.
-  2. Your docs will update and be live in moments!
-</Accordion>
+    <CodeGroup>
+    ```bash Lightweight (recommended)
+    # ~30 seconds, no ML dependencies
+    pip install -e .
+    ```
 
-## Next steps
+    ```bash Full install
+    # ~5-10 min, enables vector search and reranking
+    pip install -e ".[full]"
+    ```
+    </CodeGroup>
 
-Now that you have your docs running, explore these key features:
+    <Warning>
+    **Don't `pip install athena-cli`** — that's a different, unrelated package. Always install from inside the cloned repo.
+    </Warning>
+  </Step>
+
+  <Step title="Open in your AI editor">
+    Open the `Athena-Public/` directory as your **workspace root** in one of these editors:
+
+    - [Antigravity](https://antigravity.google/)
+    - [Cursor](https://cursor.com)
+    - [Claude Code](https://docs.anthropic.com/en/docs/claude-code)
+    - [VS Code + Copilot](https://code.visualstudio.com/)
+    - [Kilo Code](https://kilocode.ai/)
+    - [Gemini CLI](https://github.com/google-gemini/gemini-cli)
+
+    <Warning>
+    **Athena does NOT work through ChatGPT.com, Claude.ai, or Gemini web.** You need an app that can **read files from your disk**. Think of Athena as a workspace for your editor, not a plugin for a chatbot.
+    </Warning>
+
+    <Info>
+    **"Why do I open the Athena folder instead of my own project?"** — Athena is a *workspace*, not a library you install into another repo. You work *inside* the Athena folder, and it remembers everything across sessions. To work on external projects, reference them from within Athena or use multi-root workspaces in your IDE.
+    </Info>
+  </Step>
+
+  <Step title="Boot Athena">
+    In your IDE's **AI chat panel** (e.g. Cmd+L in Cursor, the chat sidebar in Antigravity), type:
+
+    ```
+    /start
+    ```
+
+    <Warning>
+    `/start`, `/end`, and `/tutorial` are **AI chat commands** — you type them in the chat window where you talk to the AI, **not** in the terminal. They are slash commands that the AI agent reads and executes.
+    </Warning>
+  </Step>
+
+  <Step title="Take the guided tour (optional)">
+    First time? Run the tutorial to build your profile:
+
+    ```
+    /tutorial
+    ```
+
+    This walks you through everything: what Athena is, how it works, builds your profile, and demos the tools (~20 min). Confident users can skip it.
+  </Step>
+
+  <Step title="Close your session">
+    When you're done working:
+
+    ```
+    /end
+    ```
+
+    This finalizes the session log, extracts key decisions, and commits everything to memory.
+  </Step>
+</Steps>
+
+## That's it!
+
+No API keys. No database setup. The folder *is* the product.
 
 <CardGroup cols={2}>
-
-<Card title="Write Content" icon="pen-to-square" href="/essentials/markdown">
-  Learn MDX syntax and start writing your documentation.
-</Card>
-
-<Card title="Customize style" icon="palette" href="/essentials/settings">
-  Make your docs match your brand perfectly.
-</Card>
-
-<Card title="Add code examples" icon="square-code" href="/essentials/code">
-  Include syntax-highlighted code blocks.
-</Card>
-
-<Card title="API documentation" icon="code" href="/api-reference/introduction">
-  Auto-generate API docs from OpenAPI specs.
-</Card>
-
+  <Card title="Your first session" icon="play" href="/your-first-session">
+    Detailed walkthrough with tips
+  </Card>
+  <Card title="Installation guide" icon="book" href="/installation">
+    Full setup instructions
+  </Card>
 </CardGroup>
 
-<Note>
-  **Need help?** See our [full documentation](https://mintlify.com/docs) or join our [community](https://mintlify.com/community).
-</Note>
+## Important notes
+
+<Warning>
+**Forks of public repos are public by default.** If you plan to store personal data (health records, finances, journals), **create a new private repo** instead of forking. Copy the files manually or use `git clone` + `git remote set-url` to point to your private repo.
+</Warning>
+
+<Tip>
+See the [full setup guide](/installation) for detailed walkthroughs and troubleshooting.
+</Tip>
+
+## Windows compatibility
+
+Athena uses modern terminal outputs (Emojis, Box-Drawing characters) which may cause a `UnicodeEncodeError` on legacy Windows terminals.
+
+**To resolve this:**
+
+1. Use **Windows Terminal** (available in the Microsoft Store)
+2. Set your Python IO encoding to UTF-8:
+   - PowerShell: `$env:PYTHONIOENCODING="utf-8"`
+   - Command Prompt: `set PYTHONIOENCODING=utf-8`
+3. Alternatively, enable strict UTF-8 globally: *Settings > Time & Language > Language & Region > Administrative language settings > Change system locale > Check "Beta: Use Unicode UTF-8 for worldwide language support"*

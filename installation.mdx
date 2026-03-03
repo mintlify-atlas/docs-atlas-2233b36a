@@ -1,0 +1,315 @@
+---
+title: Installation
+description: Complete installation guide for Athena. Set up your workspace, configure your IDE, and create your first agent.
+---
+
+This guide walks you through the complete installation process for Athena, from prerequisites to your first working session.
+
+## Prerequisites
+
+Before you begin, ensure you have:
+
+- **Python 3.10+** installed ([download here](https://www.python.org/downloads/))
+- **Terminal access** (macOS Terminal, Windows PowerShell, or Linux)
+- **Git** installed ([download here](https://git-scm.com/))
+- **An agentic AI IDE** — [Google Antigravity](https://antigravity.google/), [Cursor](https://cursor.sh/), [Kilo Code](https://kilocode.ai/), [Roo Code](https://roocode.com/), or similar
+
+## Step 1: Clone the repository
+
+Clone the Athena repository to your local machine:
+
+```bash
+git clone https://github.com/winstonkoh87/Athena-Public.git
+cd Athena-Public
+```
+
+<Info>
+Clone it anywhere you keep projects (e.g. `~/Projects/`). This folder **is** your Athena workspace — your memory, protocols, and config all live here.
+</Info>
+
+## Step 2: Set up virtual environment
+
+<Warning>
+On macOS (Homebrew) and Ubuntu 23.04+, installing packages without a virtual environment will fail with `externally-managed-environment`. Always create a `.venv` first.
+</Warning>
+
+Create and activate a Python virtual environment:
+
+<CodeGroup>
+```bash macOS / Linux
+python3 -m venv .venv
+source .venv/bin/activate
+```
+
+```bash Windows (PowerShell)
+python3 -m venv .venv
+.venv\Scripts\activate
+```
+
+```bash Windows (Command Prompt)
+python3 -m venv .venv
+.venv\Scripts\activate.bat
+```
+</CodeGroup>
+
+You should see `(.venv)` appear in your terminal prompt, indicating the virtual environment is active.
+
+## Step 3: Install the SDK
+
+Athena offers two installation modes:
+
+<CodeGroup>
+```bash Lightweight (recommended)
+# ~30 seconds, no ML dependencies
+pip install -e .
+```
+
+```bash Full install
+# ~5-10 min, enables vector search and reranking
+pip install -e ".[full]"
+```
+</CodeGroup>
+
+<Info>
+The **lightweight install** is perfect for getting started. You can always upgrade to the full install later by running `pip install -e ".[full]"`.
+</Info>
+
+<Warning>
+**Don't `pip install athena-cli`** — that's a different, unrelated package. Always install from inside the cloned repo using `pip install -e .`
+</Warning>
+
+## Step 4: Initialize workspace (optional)
+
+If you want to create a separate Athena workspace outside the cloned repo:
+
+```bash
+# Navigate to your desired location
+cd ~/MyAssistant
+
+# Initialize Athena workspace
+athena init .
+```
+
+<Note>
+Most users work directly inside the cloned `Athena-Public/` folder. Only create a separate workspace if you want to keep your personal data isolated from the example files.
+</Note>
+
+This creates the full structure:
+
+```
+MyAssistant/
+├── .athena_root          # Workspace marker
+├── .agent/
+│   ├── workflows/        # start.md, end.md, save.md
+│   ├── scripts/
+│   └── skills/protocols/
+├── .framework/modules/   # Core_Identity.md
+└── .context/
+    ├── project_state.md
+    └── memories/session_logs/
+```
+
+### IDE-specific initialization
+
+You can generate IDE-specific configuration files during initialization:
+
+<CodeGroup>
+```bash Cursor
+athena init . --ide cursor
+```
+
+```bash Antigravity
+athena init . --ide antigravity
+```
+
+```bash VS Code
+athena init . --ide vscode
+```
+
+```bash Gemini CLI
+athena init . --ide gemini
+```
+
+```bash Kilo Code
+athena init . --ide kilocode
+```
+
+```bash Roo Code
+athena init . --ide roocode
+```
+</CodeGroup>
+
+## Step 5: Configure your IDE
+
+Open the `Athena-Public/` directory (or your custom workspace) as your **workspace root** in your AI-enabled IDE.
+
+### Cursor
+
+1. Open the Athena folder: `File → Open Folder`
+2. Cursor will automatically detect `.cursor/rules.md` if you ran `athena init --ide cursor`
+3. Press `Cmd+L` (macOS) or `Ctrl+L` (Windows/Linux) to open the AI chat panel
+
+### Antigravity
+
+1. Open the Athena folder in your browser via Antigravity
+2. Antigravity will automatically load `AGENTS.md` if present
+3. Use the chat sidebar to interact with your agent
+
+### VS Code + Copilot
+
+1. Open the Athena folder: `File → Open Folder`
+2. Install the GitHub Copilot extension if not already installed
+3. Open Copilot Chat: `Ctrl+Alt+I` (Windows/Linux) or `Cmd+Shift+I` (macOS)
+
+### Claude Code
+
+1. Launch Claude Code from your terminal: `claude-code`
+2. Open the Athena folder
+3. Use the integrated chat panel
+
+<Warning>
+**Athena does NOT work through ChatGPT.com, Claude.ai, or Gemini web.** You need an app that can **read files from your disk**.
+</Warning>
+
+## Step 6: Verify installation
+
+Run the system health check:
+
+```bash
+athena check
+```
+
+You should see output like:
+
+```
+🩺 ATHENA SYSTEM CHECK
+============================================================
+   CLI Version: 9.3.1
+   ✅ Workspace marker: Found
+   ✅ .agent/: Found
+   ✅ .context/: Found
+   ✅ .framework/: Found
+============================================================
+```
+
+## Step 7: Boot your first session
+
+In your IDE's **AI chat panel** (not the terminal), type:
+
+```
+/start
+```
+
+<Warning>
+`/start` is an **AI chat command** — you type it in the chat window where you talk to the AI, **not** in the terminal.
+</Warning>
+
+You should see your agent load its core identity and confirm it's ready.
+
+## Next steps
+
+<CardGroup cols={2}>
+  <Card title="Your first session" icon="play" href="/your-first-session">
+    Walk through a guided tutorial
+  </Card>
+  <Card title="Architecture" icon="diagram-project" href="/architecture">
+    Understand how Athena works
+  </Card>
+</CardGroup>
+
+## Troubleshooting
+
+### "No session log found"
+
+Run `/start` first to create a session log before using other commands.
+
+### Scripts don't run
+
+Check that Python is installed and accessible:
+
+```bash
+python3 --version
+```
+
+Should output Python 3.10 or higher.
+
+### Workflow not recognized
+
+Ensure workflow files are in `.agent/workflows/` and your IDE can access them.
+
+### Windows encoding errors
+
+<CodeGroup>
+```powershell PowerShell
+$env:PYTHONIOENCODING="utf-8"
+```
+
+```bash Command Prompt
+set PYTHONIOENCODING=utf-8
+```
+</CodeGroup>
+
+Or use **Windows Terminal** from the Microsoft Store.
+
+### Permission denied (macOS/Linux)
+
+Make scripts executable:
+
+```bash
+chmod +x .agent/scripts/*.py
+```
+
+### Virtual environment not activating
+
+<CodeGroup>
+```bash macOS / Linux
+# Try with explicit path
+source .venv/bin/activate
+
+# Or use python -m
+python3 -m venv .venv --clear
+source .venv/bin/activate
+```
+
+```powershell Windows (PowerShell)
+# If execution policy blocks it
+Set-ExecutionPolicy -ExecutionPolicy RemoteSigned -Scope CurrentUser
+.venv\Scripts\activate
+```
+</CodeGroup>
+
+## Advanced configuration
+
+### Custom workspace location
+
+Work in a different directory:
+
+```bash
+athena init ~/Documents/MyAthena
+cd ~/Documents/MyAthena
+```
+
+### Multi-root workspace
+
+Work on external projects while keeping Athena's memory:
+
+1. Open Athena folder in your IDE
+2. `File → Add Folder to Workspace`
+3. Add your project folder
+
+Now you can work on your project while Athena maintains context across both folders.
+
+### Environment variables (optional)
+
+For cloud features (Supabase sync, API integrations), create a `.env` file:
+
+```bash
+# .env
+SUPABASE_URL=your_supabase_url
+SUPABASE_ANON_KEY=your_anon_key
+ANTHROPIC_API_KEY=your_api_key  # if using Claude directly
+```
+
+<Info>
+Cloud features are optional. Athena works 100% locally by default.
+</Info>

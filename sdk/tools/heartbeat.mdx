@@ -1,0 +1,432 @@
+---
+title: Heartbeat
+description: Read-only file watcher daemon that auto-indexes documents to Supabase with debouncing
+---
+
+Heartbeat is a file system watcher that automatically syncs markdown files to Supabase when they are created or modified.
+
+## Overview
+
+Located at `src/athena/tools/heartbeat.py`, this module provides:
+
+- **Read-only operation** - Only reads source files, never modifies them
+- **Debounced syncing** - 5-second debounce window for rapid edits
+- **Automatic table routing** - Maps directories to Supabase tables
+- **Single-scan mode** - For CI/CD and initial indexing
+
+## Class Signature
+
+```python
+class Heartbeat:
+    def __init__(self, dry_run: bool = False)
+    def start(self) -> bool
+    def stop(self) -> None
+    def run_forever(self) -> None
+    def scan_once(self) -> None
+```
+
+### Parameters
+
+- `dry_run` - Log what would be synced without actually syncing (default: False)
+
+## Architecture
+
+### Directory Watching
+
+Heartbeat watches directories defined in `athena.core.config`:
+
+```python:src/athena/tools/heartbeat.py
+from athena.core.config import CORE_DIRS, EXTENDED_DIRS
+
+# Collect watch directories
+for dir_path in CORE_DIRS.values():
+    if dir_path.exists():
+        self.watch_dirs.append(dir_path)
+
+for dir_path, _ in EXTENDED_DIRS:
+    if dir_path.exists():
+        self.watch_dirs.append(dir_path)
+```
+
+### Table Routing
+
+Files are automatically routed to Supabase tables based on their directory:
+
+```python:src/athena/tools/heartbeat.py
+def resolve_table(file_path: Path) -> Optional[str]:
+    """
+    Determine which Supabase table a file should sync to.
+    Returns None if the file is not in a watched directory.
+    """
+    # Check CORE_DIRS first (more specific)
+    for table_name, dir_path in CORE_DIRS.items():
+        if str_path.startswith(str(dir_path.resolve())):
+            return table_name
+    
+    # Check EXTENDED_DIRS
+    for dir_path, table_name in EXTENDED_DIRS:
+        if str_path.startswith(str(dir_path.resolve())):
+            return table_name
+    
+    return None
+```
+
+**Example mappings:**
+
+```python
+CORE_DIRS = {
+    "protocols": PROJECT_ROOT / ".agent" / "skills" / "protocols",
+    "case_studies": PROJECT_ROOT / ".context" / "case_studies",
+    "sessions": PROJECT_ROOT / ".context" / "sessions",
+}
+
+EXTENDED_DIRS = [
+    (PROJECT_ROOT / ".framework", "framework_docs"),
+    (PROJECT_ROOT / "docs", "system_docs"),
+]
+```
+
+## Debouncing
+
+Rapid file edits are batched using a 5-second debounce window:
+
+```python:src/athena/tools/heartbeat.py
+class DebouncedSyncHandler(FileSystemEventHandler):
+    DEBOUNCE_SECONDS = 5.0
+    
+    def _schedule_sync(self, path: str):
+        with self._lock:
+            # Cancel any pending timer for this file
+            if path in self._pending:
+                self._pending[path].cancel()
+            
+            # Schedule new sync after debounce period
+            timer = threading.Timer(
+                self.DEBOUNCE_SECONDS,
+                self._do_sync,
+                args=(file_path,)
+            )
+            timer.start()
+            self._pending[path] = timer
+```
+
+**Behavior:**
+
+- User saves `protocol.md` at t=0s → timer starts
+- User saves again at t=2s → timer resets to t=7s
+- User saves again at t=4s → timer resets to t=9s
+- No more edits → sync executes at t=9s (one sync for 3 saves)
+
+## Event Handling
+
+Two file system events trigger syncs:
+
+```python:src/athena/tools/heartbeat.py
+def on_modified(self, event):
+    if event.is_directory:
+        return
+    self._schedule_sync(event.src_path)
+
+def on_created(self, event):
+    if event.is_directory:
+        return
+    self._schedule_sync(event.src_path)
+```
+
+### File Filters
+
+```python:src/athena/tools/heartbeat.py
+# Only process markdown files
+if file_path.suffix.lower() != ".md":
+    return
+
+# Skip hidden files and temp files
+if file_path.name.startswith(".") or file_path.name.startswith("~"):
+    return
+```
+
+## Sync Operation
+
+The actual sync delegates to `athena.memory.sync`:
+
+```python:src/athena/tools/heartbeat.py
+def _do_sync(self, file_path: Path):
+    table = resolve_table(file_path)
+    if not table:
+        logger.debug(f"⏩ Ignored (no table mapping): {file_path.name}")
+        return
+    
+    if self.dry_run:
+        logger.info(f"🔍 [DRY RUN] Would sync: {file_path.name} → {table}")
+        return
+    
+    try:
+        from athena.memory.sync import sync_file_to_supabase
+        
+        logger.info(f"📡 Syncing: {file_path.name} → {table}")
+        sync_file_to_supabase(file_path, table)
+        logger.info(f"✅ Synced: {file_path.name}")
+    except Exception as e:
+        logger.error(f"❌ Sync failed for {file_path.name}: {e}")
+```
+
+## Logging
+
+All events are logged to `.athena/heartbeat.log` and stderr:
+
+```python:src/athena/tools/heartbeat.py
+LOG_DIR = PROJECT_ROOT / ".athena"
+LOG_FILE = LOG_DIR / "heartbeat.log"
+
+def setup_logging():
+    LOG_DIR.mkdir(parents=True, exist_ok=True)
+    file_handler = logging.FileHandler(LOG_FILE, encoding="utf-8")
+    file_handler.setFormatter(
+        logging.Formatter(
+            "%(asctime)s [%(levelname)s] %(message)s",
+            datefmt="%Y-%m-%d %H:%M:%S"
+        )
+    )
+    stream_handler = logging.StreamHandler(sys.stderr)
+    logger.addHandler(file_handler)
+    logger.addHandler(stream_handler)
+    logger.setLevel(logging.INFO)
+```
+
+**Example log:**
+```
+2026-03-03 14:23:15 [INFO] 💓 Athena Heartbeat starting...
+2026-03-03 14:23:15 [INFO]    📂 Watching 5 directories
+2026-03-03 14:23:15 [INFO]    🔄 Debounce: 5.0s
+2026-03-03 14:23:15 [INFO]    📡 LIVE SYNC MODE
+2026-03-03 14:23:15 [INFO]    👁️  .agent/skills/protocols
+2026-03-03 14:23:15 [INFO]    👁️  .context/case_studies
+2026-03-03 14:23:15 [INFO] 💓 Heartbeat active. Press Ctrl+C to stop.
+2026-03-03 14:25:42 [INFO] 📡 Syncing: 049-risk-management.md → protocols
+2026-03-03 14:25:43 [INFO] ✅ Synced: 049-risk-management.md
+```
+
+## CLI Usage
+
+### Daemon Mode (Default)
+
+Run as a foreground daemon:
+
+```bash
+python -m athena.tools.heartbeat
+```
+
+**Output:**
+```
+💓 Athena Heartbeat starting...
+   📂 Watching 5 directories
+   🔄 Debounce: 5.0s
+   📡 LIVE SYNC MODE
+   👁️  .agent/skills/protocols
+   👁️  .context/case_studies
+   👁️  .context/sessions
+   👁️  .framework
+   👁️  docs
+💓 Heartbeat active. Press Ctrl+C to stop.
+```
+
+### Dry Run Mode
+
+Test without syncing:
+
+```bash
+python -m athena.tools.heartbeat --dry-run
+```
+
+**Output:**
+```
+💓 Athena Heartbeat starting...
+   📂 Watching 5 directories
+   🔄 Debounce: 5.0s
+   🔍 DRY RUN MODE
+...
+🔍 [DRY RUN] Would sync: protocol-049.md → protocols
+```
+
+### Single Scan Mode
+
+Scan all directories once and exit (useful for CI/CD):
+
+```bash
+python -m athena.tools.heartbeat --once
+```
+
+**Output:**
+```
+🔍 Running single-pass scan...
+📡 Syncing: protocol-137.md → protocols
+✅ Synced: protocol-137.md
+📡 Syncing: cs-042.md → case_studies
+✅ Synced: cs-042.md
+✅ Scan complete. Synced: 2, Skipped (unchanged): 47
+```
+
+## Single-Scan Implementation
+
+The `--once` mode uses manifest-based change detection:
+
+```python:src/athena/tools/heartbeat.py
+def scan_once(self):
+    from athena.memory.sync import sync_file_to_supabase, load_manifest, get_file_hash
+    
+    manifest = load_manifest()  # Load hash cache
+    synced = 0
+    skipped = 0
+    
+    for dir_path in self.watch_dirs:
+        table = resolve_table_for_dir(dir_path)
+        
+        for md_file in dir_path.rglob("*.md"):
+            rel = str(md_file.relative_to(PROJECT_ROOT))
+            content = md_file.read_text(encoding="utf-8", errors="replace")
+            current_hash = get_file_hash(content)
+            
+            # Skip if unchanged
+            if manifest.get(rel) == current_hash:
+                skipped += 1
+                continue
+            
+            if self.dry_run:
+                logger.info(f"🔍 [DRY RUN] Would sync: {md_file.name} → {table}")
+            else:
+                sync_file_to_supabase(md_file, table, manifest=manifest)
+                synced += 1
+    
+    logger.info(f"✅ Scan complete. Synced: {synced}, Skipped (unchanged): {skipped}")
+```
+
+## Dependencies
+
+Heartbeat requires the `watchdog` library:
+
+```bash
+pip install watchdog
+```
+
+If watchdog is not installed, the module will fail gracefully:
+
+```python:src/athena/tools/heartbeat.py
+try:
+    from watchdog.events import FileSystemEventHandler
+    from watchdog.observers import Observer
+except ImportError:
+    Observer = None
+    FileSystemEventHandler = object
+    print("⚠️ watchdog not installed. Run: pip install watchdog", file=sys.stderr)
+```
+
+## Statistics Tracking
+
+```python:src/athena/tools/heartbeat.py
+self._stats = {"synced": 0, "skipped": 0, "errors": 0}
+
+# On shutdown
+stats = self.handler.stats
+logger.info(
+    f"💓 Heartbeat stopped. "
+    f"Synced: {stats['synced']}, "
+    f"Skipped: {stats['skipped']}, "
+    f"Errors: {stats['errors']}"
+)
+```
+
+## Use Cases
+
+### Development Workflow
+
+Run in a tmux/screen session during active development:
+
+```bash
+tmux new-session -d -s heartbeat 'python -m athena.tools.heartbeat'
+```
+
+### CI/CD Pipeline
+
+Run single scan after content changes:
+
+```yaml
+# .github/workflows/sync.yml
+steps:
+  - name: Sync to Supabase
+    run: python -m athena.tools.heartbeat --once
+```
+
+### Testing Changes
+
+Use dry-run to verify routing:
+
+```bash
+python -m athena.tools.heartbeat --dry-run
+# Edit a file
+# Check log output
+```
+
+## Integration Example
+
+```python
+from athena.tools.heartbeat import Heartbeat
+import time
+
+# Start daemon programmatically
+hb = Heartbeat(dry_run=False)
+hb.start()
+
+# Let it run for 60 seconds
+time.sleep(60)
+
+# Graceful shutdown
+hb.stop()
+
+# Check stats
+print(f"Synced: {hb.handler.stats['synced']} files")
+```
+
+## Safety Features
+
+### Read-Only Guarantee
+
+Heartbeat **never** writes to source files:
+
+```python:src/athena/tools/heartbeat.py
+# ✅ Only reads
+content = file_path.read_text(encoding="utf-8")
+
+# ✅ Only writes to Supabase
+sync_file_to_supabase(file_path, table)
+
+# ✅ Only writes to log
+logger.info(f"Synced: {file_path.name}")
+
+# ❌ NEVER does this
+file_path.write_text(new_content)  # Not in codebase
+```
+
+### Error Handling
+
+Sync failures are logged but don't crash the daemon:
+
+```python:src/athena/tools/heartbeat.py
+try:
+    sync_file_to_supabase(file_path, table)
+    self._stats["synced"] += 1
+except Exception as e:
+    self._stats["errors"] += 1
+    logger.error(f"❌ Sync failed for {file_path.name}: {e}")
+    # Daemon continues running
+```
+
+## Related
+
+<CardGroup cols={2}>
+  <Card title="Memory Sync" icon="cloud-arrow-up" href="/sdk/memory/sync">
+    Supabase sync implementation
+  </Card>
+  <Card title="Configuration" icon="gear" href="/sdk/core/config">
+    Directory and table mappings
+  </Card>
+</CardGroup>

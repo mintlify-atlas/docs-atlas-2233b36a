@@ -1,0 +1,375 @@
+---
+title: Semantic Search
+description: Understanding Athena's triple-path retrieval architecture for finding relevant context
+---
+
+Athena uses **Triple-Path Retrieval** to ensure no relevant context is missed. Each search method catches what the others miss.
+
+## The Architecture
+
+```text
+                               USER QUERY
+                                   │
+                                   ▼
+               ┌───────────────────┴───────────────────┐
+               │        TRIPLE-PATH RETRIEVAL          │
+               └───────────────────┬───────────────────┘
+                                   │
+         ┌─────────────────────────┼─────────────────────────┐
+         │                         │                         │
+         ▼                         ▼                         ▼
+ ┌───────────────┐        ┌───────────────┐        ┌───────────────┐
+ │    PATH 1     │        │    PATH 2     │        │    PATH 3     │
+ │               │        │               │        │               │
+ │  🔮 VECTOR    │        │  🏷️ TAG      │        │  🔎 KEYWORD   │
+ │   SEARCH      │        │   INDEX       │        │    GREP       │
+ │               │        │               │        │               │
+ │  (Semantic)   │        │  (Hashtags)   │        │  (Exact)      │
+ └───────┬───────┘        └───────┬───────┘        └───────┬───────┘
+         │                         │                         │
+         ▼                         ▼                         ▼
+  "decentralized"          "#leadership"           "Protocol 139"
+  → finds related           → finds tagged         → finds exact
+    concepts                   entities               matches
+         │                         │                         │
+         └─────────────────────────┼─────────────────────────┘
+                                   │
+                                   ▼
+                         ┌─────────────────┐
+                         │  MERGED CONTEXT │
+                         └─────────────────┘
+```
+
+---
+
+## Why Three Paths?
+
+Each retrieval method has strengths and blind spots:
+
+| Path | Catches | Misses |
+|:-----|:--------|:-------|
+| **Vector** | Synonyms, paraphrases, concepts | Exact names, entities |
+| **TAG_INDEX** | Explicitly tagged entities | Untagged content |
+| **Keyword Grep** | Exact string matches | Semantic variations |
+
+### Example: Searching for an Entity
+
+Query: "Find information about Protocol 139"
+
+- **Vector search** returns:
+  - Documents about "decentralized leadership" (semantically related)
+  - Files discussing "command structure" (conceptually similar)
+  
+- **TAG_INDEX** returns:
+  - `#leadership → protocols/139-decentralized-command.md` (exact entity match)
+  - Files explicitly tagged with `#protocol-139`
+  
+- **Keyword grep** returns:
+  - Any file containing the literal string "Protocol 139"
+  - Recent uncommitted files not yet in Supabase
+
+**Result**: The combination finds the protocol file directly (TAG_INDEX), related concepts (Vector), and any recent mentions (Grep).
+
+---
+
+## Path 1: Vector Semantic Search
+
+### How It Works
+
+<Steps>
+  <Step title="Query embedding">
+    Your search query is converted to a 3072-dimension embedding using Gemini API.
+  </Step>
+  
+  <Step title="Similarity search">
+    Cosine similarity search runs across 11 Supabase tables containing your workspace content.
+  </Step>
+  
+  <Step title="Ranked results">
+    Returns top matches ranked by semantic similarity score.
+  </Step>
+</Steps>
+
+### Usage
+
+```bash
+python3 scripts/supabase_search.py "<query>" --limit 5
+```
+
+### Strengths
+
+<CardGroup cols={2}>
+  <Card title="Conceptual matching" icon="brain">
+    Finds "fitness tracking" when you search for "health monitoring"
+  </Card>
+  
+  <Card title="Synonym handling" icon="language">
+    Understands "automobile" and "car" are related
+  </Card>
+  
+  <Card title="Paraphrase detection" icon="repeat">
+    Matches different phrasings of the same idea
+  </Card>
+  
+  <Card title="Context awareness" icon="book-open">
+    Ranks by relevance to your query context
+  </Card>
+</CardGroup>
+
+### Limitations
+
+- May miss exact entity names ("John Smith" vs "J. Smith")
+- Requires content to be synced to Supabase
+- Can't find content created seconds ago
+
+---
+
+## Path 2: TAG_INDEX Lookup
+
+### How It Works
+
+<Steps>
+  <Step title="Tag extraction">
+    The `generate_tag_index.py` script scans all workspace files for:
+    - Inline `#hashtags` in Markdown
+    - YAML frontmatter tags
+    - Protocol IDs and entity names
+  </Step>
+  
+  <Step title="Reverse index creation">
+    Creates a lookup table: `#tag → [file1, file2, ...]`
+  </Step>
+  
+  <Step title="Instant lookup">
+    When you search for a tagged entity, grep the TAG_INDEX for immediate results.
+  </Step>
+</Steps>
+
+### Example Output
+
+```text
+| #leadership | protocols/139-decentralized-command.md |
+| #archetype  | user_profile/Archetype_Example.md |
+| #vectorrag  | docs/VECTORRAG.md, docs/SEMANTIC_SEARCH.md |
+```
+
+### Usage
+
+```bash
+grep -i "<entity>" .context/TAG_INDEX.md
+```
+
+### Generating the Index
+
+```bash
+python3 scripts/generate_tag_index.py
+```
+
+**Current stats** (as of Feb 2026):
+- 1000+ tags indexed
+- 4 directories scanned (`.context/`, `.agent/`, `examples/protocols/`, `user_profile/`)
+- Extraction methods: YAML frontmatter + inline hashtags
+
+### Strengths
+
+<CardGroup cols={2}>
+  <Card title="Instant lookup" icon="bolt">
+    Zero latency for tagged entities
+  </Card>
+  
+  <Card title="Exact matches" icon="bullseye">
+    No false positives for entity names
+  </Card>
+  
+  <Card title="Manual curation" icon="hand">
+    You control what gets tagged and how
+  </Card>
+  
+  <Card title="No API costs" icon="dollar-sign">
+    Pure filesystem operation
+  </Card>
+</CardGroup>
+
+### Limitations
+
+- Only finds explicitly tagged content
+- Requires manual tagging discipline
+- Misses untagged but relevant files
+
+---
+
+## Path 3: Keyword Grep
+
+### How It Works
+
+Simple string matching across all files:
+
+```bash
+grep -ri "<keyword>" .context/ .agent/
+```
+
+### Strengths
+
+<CardGroup cols={2}>
+  <Card title="Zero false negatives" icon="check">
+    If the string exists, grep finds it
+  </Card>
+  
+  <Card title="Finds new files" icon="file-plus">
+    Catches content not yet synced to Supabase
+  </Card>
+  
+  <Card title="Exact phrases" icon="quotes">
+    Finds literal matches like "Protocol 139"
+  </Card>
+  
+  <Card title="No dependencies" icon="circle-xmark">
+    Works offline, no API or database needed
+  </Card>
+</CardGroup>
+
+### Limitations
+
+- No semantic understanding
+- High false positive rate for common words
+- Case sensitivity issues (use `-i` flag)
+
+---
+
+## When to Use Each Path
+
+<Tabs>
+  <Tab title="Conceptual Questions">
+    **Use**: Vector Search (primary)
+    
+    Examples:
+    - "What did we discuss about X?"
+    - "Show me files related to leadership"
+    - "Find documents about decentralized systems"
+    
+    **Why**: Semantic matching finds conceptually related content even with different wording.
+  </Tab>
+  
+  <Tab title="Entity Lookup">
+    **Use**: TAG_INDEX (primary) + Grep (fallback)
+    
+    Examples:
+    - "Find Protocol 139"
+    - "Show me the user archetype profile"
+    - "Where is the Einstein Protocol?"
+    
+    **Why**: Tags provide instant, exact matches for named entities.
+  </Tab>
+  
+  <Tab title="Exact Phrases">
+    **Use**: Grep (primary)
+    
+    Examples:
+    - "Find files containing 'git push origin'"
+    - "Where did I mention 'deployment failed'?"
+    - "Show me TODO comments"
+    
+    **Why**: Literal string matching for code, commands, or specific phrases.
+  </Tab>
+  
+  <Tab title="Complex Analysis">
+    **Use**: All three paths
+    
+    Examples:
+    - "Analyze our approach to leadership"
+    - "Comprehensive review of deployment strategies"
+    - "Find everything related to user authentication"
+    
+    **Why**: Combining all methods ensures comprehensive coverage.
+  </Tab>
+</Tabs>
+
+---
+
+## The Search Protocol (§0.7.1)
+
+Per Core Identity, **every query** triggers semantic context retrieval:
+
+<Steps>
+  <Step title="Vector Search (Always)">
+    ```bash
+    python3 scripts/supabase_search.py "<query>" --limit 5
+    ```
+    
+    Runs first to capture semantic context.
+  </Step>
+  
+  <Step title="Entity Lookup (Conditional)">
+    ```bash
+    grep -i "<entity_name>" .context/TAG_INDEX.md
+    ```
+    
+    If named entities detected in the query.
+  </Step>
+  
+  <Step title="Fallback Grep (As Needed)">
+    ```bash
+    grep -ri "<keyword>" .context/ .agent/
+    ```
+    
+    If above methods return sparse results.
+  </Step>
+</Steps>
+
+---
+
+## Performance Comparison
+
+### Before Triple-Path (Vector Only)
+
+| Scenario | Result |
+|:---------|:-------|
+| Search entity name | ❌ Missed related protocol |
+| Search archetype | ❌ Missed profile file |
+| Search "decentralized" | ✅ Found semantically |
+| New unsynced file | ❌ Not in Supabase yet |
+
+### After Triple-Path
+
+| Scenario | Result |
+|:---------|:-------|
+| Search entity name | ✅ Found via TAG_INDEX |
+| Search archetype | ✅ Found via TAG_INDEX |
+| Search "decentralized" | ✅ Still works (Vector) |
+| New unsynced file | ✅ Found via grep |
+
+---
+
+## Best Practices
+
+<CardGroup cols={2}>
+  <Card title="Tag important entities" icon="tag">
+    Add `#tags` to protocols, workflows, and key documents for instant lookup.
+  </Card>
+  
+  <Card title="Sync regularly" icon="cloud-arrow-up">
+    Run `supabase_sync.py` to keep your vector embeddings current.
+  </Card>
+  
+  <Card title="Regenerate TAG_INDEX" icon="rotate">
+    Run `generate_tag_index.py` after adding new files or tags.
+  </Card>
+  
+  <Card title="Use all three paths" icon="layer-group">
+    For important searches, don't rely on just one method.
+  </Card>
+</CardGroup>
+
+---
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Multi-Model Strategy" href="/guides/multi-model-strategy" icon="brain">
+    Learn how to route different tasks to different AI models
+  </Card>
+  
+  <Card title="Importing Data" href="/guides/importing-data" icon="file-import">
+    Bring existing knowledge into your Athena workspace
+  </Card>
+</CardGroup>

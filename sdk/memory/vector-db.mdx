@@ -1,0 +1,444 @@
+---
+title: "Vector Database"
+description: "Complete reference for Athena's vector database integration, embedding generation, and semantic search capabilities."
+---
+
+## Overview
+
+The `athena.memory.vectors` module provides thread-safe vector embedding and semantic search powered by:
+
+- **Supabase pgvector** - PostgreSQL extension for vector similarity search
+- **Gemini Embeddings** - Google's `gemini-embedding-001` model (3072 dimensions)
+- **Persistent Cache** - Disk-backed embedding cache with atomic writes
+
+<Info>
+  **Thread Safety**: All functions use thread-local clients and locked cache operations to support parallel execution.
+</Info>
+
+## Core Functions
+
+### `get_embedding(text: str) -> List[float]`
+
+Generate a 3072-dimensional embedding vector for any text.
+
+**Parameters:**
+- `text` (str) - Input text to embed (max 30,000 characters for sync operations)
+
+**Returns:**
+- `List[float]` - Embedding vector (3072 dimensions)
+
+**Example:**
+
+```python
+from athena.memory.vectors import get_embedding
+
+text = "Implement multi-agent coordination protocol"
+embedding = get_embedding(text)
+
+print(len(embedding))  # 3072
+print(embedding[:5])   # [-0.023, 0.156, -0.089, 0.234, 0.012]
+```
+
+**Caching Behavior:**
+
+- Computes MD5 hash of input text
+- Checks `.athena/state/embedding_cache.json` for cached result
+- On cache miss, calls Gemini API and stores result
+- Background daemon thread handles disk writes
+
+<Warning>
+  Requires `GOOGLE_API_KEY` environment variable. Missing credentials raise `ValueError`.
+</Warning>
+
+Reference: `vectors.py:119-151`
+
+### `get_client() -> Any`
+
+Returns a thread-safe Supabase client instance.
+
+**Returns:**
+- Supabase `Client` object
+
+**Example:**
+
+```python
+from athena.memory.vectors import get_client
+
+client = get_client()
+result = client.table('sessions').select('*').limit(5).execute()
+```
+
+**Thread Safety:**
+
+Uses thread-local storage to maintain separate client instances per thread:
+
+```python
+import threading
+
+_thread_local = threading.local()
+
+def get_client():
+    if not hasattr(_thread_local, "client"):
+        _thread_local.client = create_client(url, key)
+    return _thread_local.client
+```
+
+Reference: `vectors.py:35-48`
+
+### `search_rpc(rpc_name: str, query_embedding: List[float], limit: int = 5, threshold: float = 0.3) -> List[Dict]`
+
+Generic semantic search using Supabase RPC functions.
+
+**Parameters:**
+- `rpc_name` (str) - RPC function name (e.g., `search_sessions`)
+- `query_embedding` (List[float]) - Query vector from `get_embedding()`
+- `limit` (int) - Maximum results (default: 5)
+- `threshold` (float) - Similarity threshold 0-1 (default: 0.3)
+
+**Returns:**
+- `List[Dict]` - Matching documents with metadata
+
+**Example:**
+
+```python
+from athena.memory.vectors import get_embedding, search_rpc
+
+query = "How to handle API rate limiting?"
+embedding = get_embedding(query)
+
+results = search_rpc(
+    "search_protocols",
+    embedding,
+    limit=3,
+    threshold=0.4
+)
+
+for doc in results:
+    print(f"Code: {doc['code']}")
+    print(f"Similarity: {doc['similarity']:.3f}")
+    print(f"Content: {doc['content'][:200]}...\n")
+```
+
+Reference: `vectors.py:154-166`
+
+## Collection-Specific Search
+
+Convenience wrappers for each synchronized collection:
+
+### Sessions
+
+```python
+from athena.memory.vectors import get_client, search_sessions, get_embedding
+
+client = get_client()
+query_embedding = get_embedding("cognitive load tracking sessions")
+
+results = search_sessions(
+    client,
+    query_embedding,
+    limit=5,
+    threshold=0.35
+)
+
+for session in results:
+    print(f"{session['session_id']}: {session['title']}")
+    print(f"Date: {session['date']}")
+```
+
+Reference: `vectors.py:172-173`
+
+### Protocols
+
+```python
+from athena.memory.vectors import get_client, search_protocols, get_embedding
+
+client = get_client()
+query = "graph of thoughts reasoning"
+embedding = get_embedding(query)
+
+protocols = search_protocols(client, embedding, limit=3)
+
+for protocol in protocols:
+    print(f"Protocol {protocol['code']}: {protocol['name']}")
+```
+
+Reference: `vectors.py:180-181`
+
+### Available Search Functions
+
+| Function | Table | Use Case |
+|:---------|:------|:---------|
+| `search_sessions()` | sessions | Session logs, checkpoints |
+| `search_protocols()` | protocols | Agent protocols, workflows |
+| `search_case_studies()` | case_studies | Case study analysis |
+| `search_capabilities()` | capabilities | Feature documentation |
+| `search_workflows()` | workflows | Workflow definitions |
+| `search_frameworks()` | frameworks | Framework specs |
+| `search_entities()` | entities | Entity references |
+| `search_user_profile()` | user_profile | User preferences |
+| `search_system_docs()` | system_docs | System documentation |
+| `search_insights()` | insights | Marketing, strategic notes |
+
+All functions share the same signature:
+
+```python
+def search_collection(
+    client,
+    query_embedding: List[float],
+    limit: int = 5,
+    threshold: float = 0.3
+) -> List[Dict]
+```
+
+References: `vectors.py:169-218`
+
+## Embedding Cache
+
+### Architecture
+
+The `PersistentEmbeddingCache` class provides thread-safe disk caching:
+
+```python
+class PersistentEmbeddingCache:
+    def __init__(self, filename="embedding_cache.json"):
+        self.cache_file = AGENT_DIR / "state" / filename
+        self.lock = threading.Lock()
+        self._cache: Dict[str, List[float]] = {}
+        self._dirty = False
+        self._load()
+```
+
+**Key Features:**
+
+1. **Atomic Writes** - Uses temp file + `os.replace()`
+2. **Background Saves** - Daemon threads prevent blocking
+3. **Thread-Safe** - All operations protected by locks
+4. **Lazy Loading** - Cache loads on first access
+
+Reference: `vectors.py:51-113`
+
+### Cache Operations
+
+**Get cached embedding:**
+
+```python
+from athena.memory.vectors import get_embedding_cache
+
+cache = get_embedding_cache()
+text_hash = "5d41402abc4b2a76b9719d911017c592"  # MD5 of text
+
+embedding = cache.get(text_hash)
+if embedding:
+    print(f"Cache hit: {len(embedding)} dims")
+```
+
+**Set new embedding:**
+
+```python
+cache.set(text_hash, embedding_vector)
+# Background save automatically triggered
+```
+
+**Direct hash generation:**
+
+```python
+import hashlib
+
+def _hash_text(text: str) -> str:
+    return hashlib.md5(text.encode()).hexdigest()
+
+text_hash = _hash_text("my query")
+```
+
+Reference: `vectors.py:115-116`
+
+### Cache File Location
+
+```bash
+.athena/state/embedding_cache.json
+```
+
+**Format:**
+
+```json
+{
+  "5d41402abc4b2a76b9719d911017c592": [-0.023, 0.156, ...],
+  "7c6a180b36896a0a8c02787eeafb0e4c": [0.045, -0.234, ...]
+}
+```
+
+## Retry & Error Handling
+
+The sync module implements exponential backoff for Supabase operations:
+
+```python
+max_retries = 3
+for attempt in range(max_retries):
+    try:
+        client.table(table_name).upsert(data).execute()
+        return True
+    except Exception as e:
+        if attempt < max_retries - 1:
+            wait = (2 ** attempt) + 0.5  # 1.5s, 2.5s, 4.5s
+            time.sleep(wait)
+        else:
+            raise e
+```
+
+Reference: `sync.py:112-133`
+
+## Environment Configuration
+
+### Required Variables
+
+```bash .env
+# Supabase Configuration
+NEXT_PUBLIC_SUPABASE_URL=https://your-project.supabase.co
+SUPABASE_SERVICE_ROLE_KEY=eyJhbGciOiJIUzI1NiIsInR5cCI6IkpXVCJ9...
+
+# Google AI Platform
+GOOGLE_API_KEY=AIzaSyD...
+```
+
+### Validation
+
+```python
+import os
+from dotenv import load_dotenv
+
+load_dotenv()
+
+# Check Supabase
+url = os.getenv("NEXT_PUBLIC_SUPABASE_URL")
+key = os.getenv("SUPABASE_SERVICE_ROLE_KEY")
+if not url or not key:
+    raise ValueError("Supabase credentials missing")
+
+# Check Google AI
+api_key = os.getenv("GOOGLE_API_KEY")
+if not api_key:
+    raise ValueError("GOOGLE_API_KEY missing")
+```
+
+Reference: `vectors.py:42-46`, `vectors.py:136-138`
+
+## Performance Considerations
+
+### Embedding Generation
+
+- **Latency**: ~200-500ms per API call (uncached)
+- **Caching**: ~0.1ms for cached lookups
+- **Rate Limits**: Gemini API has default quotas (check Google AI documentation)
+
+### Parallel Execution
+
+Safe for multi-threaded use:
+
+```python
+from concurrent.futures import ThreadPoolExecutor
+from athena.memory.vectors import get_embedding
+
+texts = ["query 1", "query 2", "query 3"]
+
+with ThreadPoolExecutor(max_workers=5) as executor:
+    embeddings = list(executor.map(get_embedding, texts))
+```
+
+Thread-local clients prevent connection state issues.
+
+### Database Queries
+
+- **pgvector Indexes**: Ensure Supabase tables have vector indexes
+- **Similarity Search**: Uses cosine similarity by default
+- **Result Limits**: Keep `limit <= 20` for optimal performance
+
+## Advanced Usage
+
+### Custom Search Thresholds
+
+Adjust similarity threshold based on use case:
+
+```python
+# Strict matching (high precision)
+results = search_protocols(client, embedding, threshold=0.5)
+
+# Broad matching (high recall)
+results = search_protocols(client, embedding, threshold=0.2)
+
+# Balanced (default)
+results = search_protocols(client, embedding, threshold=0.3)
+```
+
+### Multi-Collection Search
+
+Search across multiple collections:
+
+```python
+from athena.memory.vectors import (
+    get_client,
+    get_embedding,
+    search_protocols,
+    search_workflows,
+    search_case_studies
+)
+
+client = get_client()
+query = "agent coordination patterns"
+embedding = get_embedding(query)
+
+all_results = []
+all_results.extend(search_protocols(client, embedding))
+all_results.extend(search_workflows(client, embedding))
+all_results.extend(search_case_studies(client, embedding))
+
+# Sort by similarity score
+all_results.sort(key=lambda x: x.get('similarity', 0), reverse=True)
+top_10 = all_results[:10]
+```
+
+## Troubleshooting
+
+### "Supabase credentials missing"
+
+**Cause**: Environment variables not loaded
+
+**Fix**:
+```python
+from dotenv import load_dotenv
+load_dotenv()  # Call before importing athena.memory.vectors
+```
+
+### "GOOGLE_API_KEY missing"
+
+**Cause**: Missing or invalid API key
+
+**Fix**: Add to `.env` file:
+```bash
+GOOGLE_API_KEY=AIzaSyD...
+```
+
+### Empty search results
+
+**Cause**: Threshold too high or no matching documents
+
+**Fix**: Lower threshold or check table population:
+```python
+results = search_protocols(client, embedding, threshold=0.1)
+```
+
+### Connection pool errors
+
+**Cause**: Shared client in multi-threaded context
+
+**Fix**: Use `get_client()` which provides thread-local instances.
+
+## Next Steps
+
+<CardGroup cols={2}>
+  <Card title="Sessions" icon="clock-rotate-left" href="/sdk/memory/sessions">
+    Learn session lifecycle and checkpointing
+  </Card>
+  <Card title="Memory Overview" icon="brain" href="/sdk/memory/overview">
+    Return to memory system overview
+  </Card>
+</CardGroup>
